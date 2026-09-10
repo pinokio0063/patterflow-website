@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatternFlow — Automate Your Jersey Print Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #07080d;
+  --white: #ffffff;
+  --p1: #D300FF;
+  --p2: #8800FF;
+  --p3: #34E3F8;
+  --grad: linear-gradient(135deg, #D300FF 0%, #8800FF 50%, #34E3F8 100%);
+  --grad-btn: linear-gradient(90deg, #D300FF, #8800FF);
+  --surface: #0e0f17;
+  --surface2: #13141f;
+  --surface3: #1a1b28;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(211,0,255,0.25);
+  --text-muted: rgba(255,255,255,0.45);
+  --text-secondary: rgba(255,255,255,0.7);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --max-w: 1280px;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--black); color: var(--white); font-family: var(--font-body); font-size: 16px; line-height: 1.65; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+/* NAV */
+.site-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 4rem; height: 76px; background: rgba(7,8,13,0.85); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border); }
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--white); font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; }
+.nav-logo-img { height: 32px; width: auto; object-fit: contain; display: block; }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+.nav-menu-btn {
+  appearance: none;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.nav-menu-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.28);
+}
+.nav-menu-btn[aria-expanded="true"] {
+  background: rgba(211,0,255,0.18);
+  border-color: rgba(211,0,255,0.45);
+}
+.nav-menu-btn__icon {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5px;
+  width: 16px;
+}
+.nav-menu-btn__icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+.nav-menu-btn[aria-expanded="true"] .nav-menu-btn__icon span:nth-child(1) {
+  transform: translateY(5.5px) rotate(45deg);
+}
+.nav-menu-btn[aria-expanded="true"] .nav-menu-btn__icon span:nth-child(2) {
+  opacity: 0;
+}
+.nav-menu-btn[aria-expanded="true"] .nav-menu-btn__icon span:nth-child(3) {
+  transform: translateY(-5.5px) rotate(-45deg);
+}
+
+/* Side menu drawer */
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(7, 8, 13, 0.55);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.side-menu-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.side-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 210;
+  width: min(100vw, 380px);
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #0e0f17;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  box-shadow: -20px 0 60px rgba(0,0,0,0.45);
+  transform: translateX(105%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.side-menu.is-open {
+  transform: translateX(0);
+}
+.side-menu__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.side-menu__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.side-menu__close {
+  appearance: none;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.side-menu__close:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.28);
+}
+.side-menu__close svg {
+  width: 16px;
+  height: 16px;
+}
+.side-menu__nav {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  width: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 1.1rem 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-sizing: border-box;
+}
+.side-menu__label {
+  margin: 0.85rem 0.65rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.side-menu__label:first-child {
+  margin-top: 0.25rem;
+}
+.side-menu__link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.05rem;
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--white);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.side-menu__link:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateX(2px);
+}
+.side-menu__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.side-menu__icon svg {
+  width: 16px;
+  height: 16px;
+}
+.side-menu__link--howtouse .side-menu__icon { background: rgba(255,77,141,0.2); color: #ff4d8d; }
+.side-menu__link--support .side-menu__icon { background: rgba(255,255,255,0.08); color: #fff; }
+.side-menu__link--library .side-menu__icon { background: rgba(211,0,255,0.2); color: #D300FF; }
+.side-menu__link--layouts .side-menu__icon { background: rgba(136,0,255,0.2); color: #8800FF; }
+.side-menu__link--pricing .side-menu__icon { background: rgba(52,227,248,0.18); color: #34E3F8; }
+.side-menu__link--datasheet .side-menu__icon { background: rgba(255,255,255,0.1); color: #fff; }
+.side-menu__link--howtouse { border-color: rgba(255,77,141,0.18); }
+.side-menu__link--library { border-color: rgba(211,0,255,0.18); }
+.side-menu__link--layouts { border-color: rgba(136,0,255,0.18); }
+.side-menu__link--pricing { border-color: rgba(52,227,248,0.18); }
+.side-menu__link--datasheet { border-color: rgba(255,255,255,0.12); }
+
+body.side-menu-open {
+  overflow: hidden;
+}
+
+/* BG */
+.hero-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse 55% 55% at 15% 30%, rgba(211,0,255,0.1) 0%, transparent 65%), radial-gradient(ellipse 45% 45% at 85% 70%, rgba(52,227,248,0.07) 0%, transparent 60%), radial-gradient(ellipse 35% 35% at 50% 50%, rgba(136,0,255,0.05) 0%, transparent 60%); }
+
+/* HERO GRID */
+.hero { min-height: 100vh; display: grid; grid-template-columns: 1.2fr 0.8fr; align-items: center; gap: 4.5rem; padding: 9rem 3rem 6rem; max-width: var(--max-w); margin: 0 auto; }
+.hero-left { display: flex; flex-direction: column; align-items: flex-start; width: 100%; }
+.hero-right { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-accent); border-radius: 999px; padding: 0.4rem 1rem; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #D300FF; margin-bottom: 1.75rem; animation: fadeUp 0.5s ease both; background: rgba(211,0,255,0.04); }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--p1); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+/* TYPOGRAPHY */
+.hero h1 { 
+  font-family: var(--font-display); 
+  font-size: clamp(2.4rem, 4.1vw, 4.3rem); 
+  font-weight: 800; 
+  line-height: 0.98 !important; 
+  letter-spacing: -0.035em; 
+  animation: fadeUp 0.5s 0.08s ease both; 
+}
+.nobr {
+  display: block; 
+  white-space: nowrap !important; 
+  width: max-content;
+  margin-bottom: 0.35rem; 
+}
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 520px; margin-top: 1.5rem; font-weight: 300; line-height: 1.75; animation: fadeUp 0.5s 0.16s ease both; }
+
+/* HERO ACTIONS */
+.hero-cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 480px;
+  animation: fadeUp 0.5s 0.24s ease both;
+}
+.hero-actions { display: flex; gap: 1rem; width: 100%; }
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--grad-btn); color: #fff; padding: 0.9rem 2rem; border-radius: 999px; font-weight: 700; font-size: 1rem; text-decoration: none; transition: opacity 0.2s, transform 0.15s; font-family: var(--font-display); letter-spacing: -0.01em; flex: 1; text-align: center; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+.btn-primary svg { width: 18px; height: 18px; flex-shrink: 0; }
+.hero-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem; animation: fadeUp 0.5s 0.32s ease both; }
+
+/* 3D ISOMETRIC PREVIEW WORKSPACE WITH MOVING GLOWING STROKE */
+.mockup-wrapper {
+  position: relative;
+  perspective: 1200px; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.mockup-bg-canvas {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  border-radius: 20px;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.85;
+}
+.ext-mockup {
+  width: 100%;
+  max-width: 390px; 
+  background: #0f101a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: -30px 45px 95px rgba(0, 0, 0, 0.7), 0 0 60px rgba(136, 0, 255, 0.15);
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+}
+
+/* Glowing running border stroke from top to bottom */
+.ext-mockup::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 2px; /* Stroke border width */
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    var(--p1) 30%, 
+    var(--p3) 50%, 
+    var(--p2) 70%, 
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 5;
+  animation: movingGlowStroke 4s linear infinite;
+}
+
+@keyframes movingGlowStroke {
+  0% {
+    background-position: 0% -100%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+.mockup-header {
+  background: #141624;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+}
+.mockup-dots {
+  display: flex;
+  gap: 6px;
+}
+.mockup-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.mockup-dots .red { background: #ff5f56; }
+.mockup-dots .yellow { background: #ffbd2e; }
+.mockup-dots .green { background: #27c93f; }
+.mockup-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.mockup-body {
+  position: relative;
+  background: #0d0e16;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ext-ui-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* PATTERN PROMO CARD DESIGN */
+.pattern-promo-card {
+  background: linear-gradient(145deg, var(--surface2) 0%, rgba(211,0,255,0.03) 100%);
+  border: 1px solid rgba(52,227,248,0.2);
+  border-radius: var(--radius-lg);
+  padding: 4rem 3.5rem;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  align-items: center;
+  gap: 4rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+}
+.pattern-promo-card::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(52,227,248,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.promo-left { position: relative; z-index: 2; }
+.promo-right { position: relative; display: flex; justify-content: center; align-items: center; height: 100%; min-height: 250px; perspective: 1000px; }
+.vector-pattern-shapes { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.v-shape {
+  position: absolute;
+  border-radius: 12px;
+  padding: 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+  transition: transform 0.4s ease;
+  width: 130px;
+  height: 130px;
+}
+.v-shape span { font-size: 0.7rem; font-weight: 400; color: var(--text-muted); margin-top: 4px; }
+.v-shape.s1 {
+  background: rgba(211,0,255,0.12);
+  border-color: rgba(211,0,255,0.3);
+  color: #D300FF;
+  top: -10px;
+  left: 10%;
+  transform: rotate(-12deg) translateZ(20px);
+}
+.v-shape.s2 {
+  background: rgba(52,227,248,0.12);
+  border-color: rgba(52,227,248,0.3);
+  color: #34E3F8;
+  bottom: -10px;
+  right: 10%;
+  transform: rotate(15deg) translateZ(40px);
+}
+.v-shape.s3 {
+  background: var(--surface3);
+  color: var(--white);
+  top: 40px;
+  left: 40%;
+  transform: rotate(5deg) translateZ(-10px);
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* COMPAT BAR */
+.compat-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 2.5rem; padding: 1.5rem 3rem; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.compat-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); }
+.compat-check { color: #34E3F8; font-weight: 700; }
+
+/* STATS */
+.stats { display: flex; justify-content: center; border-bottom: 1px solid var(--border); background: var(--surface); }
+.stat-item { flex: 1; max-width: 220px; text-align: center; padding: 2rem 1.5rem; border-right: 1px solid var(--border); }
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; text-transform: uppercase; letter-spacing: 0.07em; }
+
+/* SECTIONS */
+section { padding: 6.5rem 3rem; }
+.container { max-width: var(--max-w); margin: 0 auto; }
+.section-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #34E3F8; margin-bottom: 1rem; }
+.section-label::before { content: ''; width: 18px; height: 1.5px; background: #34E3F8; display: block; }
+.section-title { font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1rem; }
+.section-sub { color: var(--text-secondary); font-size: 1rem; max-width: 480px; font-weight: 300; }
+
+/* HOW */
+.how { background: var(--surface); }
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-top: 3.5rem; }
+.step-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem 1.5rem; position: relative; transition: border-color 0.25s; }
+.step-card:hover { border-color: var(--border-accent); }
+
+/* STEP NUMBERS */
+.step-num { 
+  font-family: var(--font-display); 
+  font-size: 3rem; 
+  font-weight: 800; 
+  line-height: 1; 
+  color: rgba(255, 255, 255, 0.32); 
+  position: absolute; 
+  top: 1rem; 
+  right: 1.25rem; 
+  letter-spacing: -0.04em; 
+}
+.step-icon { width: 44px; height: 44px; border-radius: 10px; background: rgba(211,0,255,0.1); border: 1px solid rgba(211,0,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 1.25rem; }
+.step-card h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.step-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.65; }
+
+/* FEATURES */
+.features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3.5rem; }
+.feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; transition: border-color 0.25s; }
+.feature-card:hover { border-color: var(--border-accent); }
+.feature-card.wide { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; align-items: center; border-color: rgba(136,0,255,0.2); background: linear-gradient(135deg, rgba(211,0,255,0.05) 0%, rgba(136,0,255,0.05) 50%, transparent 80%); }
+.feature-tag { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #D300FF; background: rgba(211,0,255,0.1); border: 1px solid rgba(211,0,255,0.2); border-radius: 4px; padding: 3px 9px; margin-bottom: 0.85rem; }
+.feature-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.02em; }
+.feature-card p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.7; }
+.feature-icon { font-size: 1.75rem; margin-bottom: 1rem; }
+.nest-visual { background: var(--surface3); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem; }
+.nest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.nest-item { aspect-ratio: 3/4; border-radius: 6px; background: rgba(136,0,255,0.12); border: 1px solid rgba(136,0,255,0.25); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 6px 4px; font-size: 0.58rem; font-weight: 700; color: rgba(211,0,255,0.8); gap: 2px; }
+.nest-item .nn { font-size: 0.7rem; color: rgba(52,227,248,0.85); }
+.nest-item:nth-child(3n) { background: rgba(211,0,255,0.1); border-color: rgba(211,0,255,0.25); }
+.format-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1.25rem; }
+.fpill { display: flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; padding: 0.4rem 1rem; font-size: 0.82rem; font-weight: 600; }
+.fpill .dot { width: 7px; height: 7px; border-radius: 50%; }
+.datasheet-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 1rem; color: #34E3F8; font-weight: 600; font-size: 0.875rem; text-decoration: none; }
+.datasheet-link:hover { text-decoration: underline; }
+
+/* PRICING GATEWAY */
+.pricing-portal { background: var(--surface); position: relative; overflow: hidden; }
+.pricing-portal::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 80% 50%, rgba(211,0,255,0.06) 0%, transparent 60%); }
+.pricing-banner-card {
+  background: linear-gradient(145deg, var(--surface2) 0%, rgba(26,27,40,0.6) 100%);
+  border: 1px solid rgba(136,0,255,0.25);
+  border-radius: var(--radius-lg);
+  padding: 3.5rem;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 3rem;
+  margin-top: 3.5rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+.pb-badge { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #34E3F8; background: rgba(52,227,248,0.08); border: 1px solid rgba(52,227,248,0.2); border-radius: 999px; padding: 4px 14px; margin-bottom: 1.25rem; }
+.pricing-banner-card h3 { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; line-height: 1.15; margin-bottom: 1rem; }
+.pricing-banner-card p { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 1.5rem; line-height: 1.65; max-width: 580px; }
+.pricing-mini-specs { display: flex; flex-direction: column; gap: 0.75rem; }
+.pricing-mini-specs div { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-secondary); }
+.pricing-mini-specs svg { color: #34E3F8; flex-shrink: 0; }
+.pricing-banner-right { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(7,8,13,0.4); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem 2rem; text-align: center; }
+.pbr-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 0.5rem; }
+.pbr-price { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1; }
+.pbr-subtext { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 1.75rem; }
+.btn-pricing-portal { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: var(--grad-btn); color: #fff; width: 100%; padding: 0.9rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.95rem; text-decoration: none; transition: transform 0.2s, opacity 0.2s; box-shadow: 0 4px 15px rgba(211,0,255,0.25); }
+.btn-pricing-portal:hover { transform: translateY(-2px); opacity: 0.95; }
+
+/* RESOURCES SECTION WITH DETAILED INFO BLOCKS */
+#resources { background: var(--surface); border-top: 1px solid var(--border); }
+.resource-info-list { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2.25rem; text-align: left; }
+.resource-info-item { display: flex; gap: 14px; align-items: flex-start; }
+.resource-info-icon { font-size: 1.6rem; line-height: 1; }
+.resource-info-text h4 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.25rem; }
+.resource-info-text p { font-size: 0.85rem; color: var(--text-secondary); }
+
+/* SUPPORT */
+.support-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 3rem; }
+.support-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem; display: flex; flex-direction: column; gap: 0.75rem; transition: border-color 0.2s; }
+.support-card:hover { border-color: var(--border-accent); }
+.s-icon { font-size: 1.75rem; }
+.support-card h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
+.support-card p { font-size: 0.85rem; color: var(--text-secondary); flex: 1; }
+.s-link { display: inline-flex; align-items: center; gap: 6px; color: #34E3F8; font-weight: 600; font-size: 0.85rem; text-decoration: none; margin-top: 0.5rem; }
+.s-link:hover { text-decoration: underline; }
+
+/* CTA SECTION */
+.cta-section { text-align: center; background: linear-gradient(160deg, rgba(211,0,255,0.07) 0%, rgba(136,0,255,0.07) 50%, transparent 80%); border-top: 1px solid rgba(136,0,255,0.15); }
+.cta-section .section-title { font-size: clamp(2.2rem, 4vw, 3.5rem); }
+.cta-actions { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; margin-top: 2.25rem; }
+
+.cta-actions .btn-primary-small { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 8px; 
+  background: var(--grad-btn); 
+  color: #fff; 
+  padding: 0.9rem 1.75rem; 
+  border-radius: 999px; 
+  font-weight: 500; 
+  font-size: 1rem; 
+  text-decoration: none; 
+  transition: opacity 0.2s, transform 0.15s; 
+  font-family: var(--font-body); 
+  white-space: nowrap; 
+}
+.cta-actions .btn-primary-small:hover { opacity: 0.9; transform: translateY(-1px); }
+.cta-actions .btn-primary-small svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--white); padding: 0.9rem 1.75rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); font-weight: 400; font-size: 1rem; text-decoration: none; transition: border-color 0.2s, background 0.2s; white-space: nowrap; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
+/* FOOTER */
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 2rem 4rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.footer-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white); font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; }
+.footer-logo-img { height: 24px; width: auto; object-fit: contain; }
+.footer-links { display: flex; gap: 1.75rem; list-style: none; flex-wrap: wrap; }
+.footer-links a { color: var(--text-muted); font-size: 0.85rem; text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+footer small { color: var(--text-muted); font-size: 0.78rem; }
+
+/* REVEAL */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; padding: 8rem 2rem 4rem; gap: 3.5rem; text-align: left; }
+  .hero-left { align-items: flex-start; }
+  .hero h1 { font-size: clamp(2.2rem, 7vw, 3.2rem); }
+  .nobr { white-space: normal; } 
+  .hero-cta-group { max-width: 100%; }
+  .mockup-wrapper { width: 100%; justify-content: center; }
+  .ext-mockup { transform: none !important; margin: 0 auto; }
+  .mockup-bg-canvas { display: none; }
+  .pattern-promo-card { grid-template-columns: 1fr; padding: 2.5rem 2rem; gap: 2rem; }
+  .promo-right { min-height: 200px; }
+  .pricing-banner-card { grid-template-columns: 1fr; padding: 2.2rem; gap: 2rem; }
+  .pricing-banner-right { padding: 2rem 1.5rem; }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card.wide { grid-column: span 1; grid-template-columns: 1fr; }
+  .support-grid { grid-template-columns: 1fr; }
+  section { padding: 4.5rem 2rem; }
+  .site-nav { padding: 0 2rem; }
+  .stats { overflow-x: auto; justify-content: flex-start; padding: 0 1rem; }
+  .stat-item { min-width: 130px; flex: none; }
+  footer { padding: 2rem; }
+  .compat-bar { padding: 1.25rem 2rem; gap: 1.25rem; }
+}
+@media (max-width: 560px) {
+  .steps-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; }
+  .btn-primary { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="hero-bg"></div>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <a href="#" class="nav-logo">
+    <img src="icon/logo.png" onerror="this.style.display='none'; document.getElementById('nav-fallback-mark').style.display='flex';" class="nav-logo-img" alt="PatternFlow Logo">
+    <div class="nav-logo-mark" id="nav-fallback-mark" style="width: 28px; height: 28px; border-radius: 8px; background: var(--grad); display: none; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #fff; flex-shrink: 0; margin-right: 8px;">PF</div>
+    PatternFlow
+  </a>
+  <div class="nav-right">
+    <button type="button" class="nav-menu-btn" id="navMenuBtn" aria-expanded="false" aria-controls="sideMenu" aria-label="Open menu">
+      <span class="nav-menu-btn__icon" aria-hidden="true"><span></span><span></span><span></span></span>
+      Menu
+    </button>
+  </div>
+</nav>
+
+<div class="side-menu-backdrop" id="sideMenuBackdrop" aria-hidden="true"></div>
+<aside class="side-menu" id="sideMenu" aria-hidden="true" aria-labelledby="sideMenuTitle">
+  <div class="side-menu__header">
+    <p class="side-menu__title" id="sideMenuTitle">Menu</p>
+    <button type="button" class="side-menu__close" id="sideMenuClose" aria-label="Close menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <nav class="side-menu__nav" aria-label="Site menu">
+    <a href="https://patterflowuse.netlify.app/" target="_blank" rel="noopener" class="side-menu__link side-menu__link--howtouse">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg></span>
+      How to use
+    </a>
+    <a href="https://patterflowlayouts.netlify.app/" target="_blank" rel="noopener" class="side-menu__link side-menu__link--layouts">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+      Layouts
+    </a>
+    <a href="https://patterflowprice.netlify.app/" class="side-menu__link side-menu__link--pricing">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+      Pricing
+    </a>
+    <a href="https://patterflowdatasheet.netlify.app/" target="_blank" rel="noopener" class="side-menu__link side-menu__link--datasheet">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></span>
+      Data Sheet
+    </a>
+    <a href="https://patterflowpattern.netlify.app/" target="_blank" rel="noopener" class="side-menu__link side-menu__link--library">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="16" y2="7"/><line x1="9" y1="11" x2="16" y2="11"/></svg></span>
+      Pattern Library
+    </a>
+    <a href="#support" class="side-menu__link side-menu__link--support">
+      <span class="side-menu__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      Support
+    </a>
+  </nav>
+</aside>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-badge"><span class="badge-dot"></span>Adobe Illustrator Extension</div>
+    
+    <h1>
+      <span class="nobr">Automate Your</span>
+      <span class="nobr grad-text">Jersey Print</span>
+      <span class="nobr">Workflow</span>
+    </h1>
+    <p class="hero-sub">PatternFlow handles resizing, nesting, naming, and numbering automatically — delivering print-ready files in seconds, not hours.</p>
+
+
+<div class="hero-cta-group">
+      <div class="hero-actions">
+        <a href="https://wa.me/15625100176" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Free Extension (.EXE)
+        </a>
+      </div>
+    </div>
+    <p class="hero-note">Free Version · Illustrator CC 2017+ · Windows Compatibility</p>
+  </div>
+
+  <div class="hero-right">
+    <!-- ৩ডি ব্যাকগ্রাউন্ড এবং ডাইনামিক গ্লোবাল মাউস ৩ডি টিল্টিং মকআপ -->
+    <div class="mockup-wrapper">
+      <div id="hero-3d-canvas" class="mockup-bg-canvas"></div>
+      <div class="ext-mockup" id="tilting-card">
+        <div class="mockup-header">
+          <div class="mockup-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="mockup-title">PatternFlow Extension Panel</div>
+        </div>
+        <div class="mockup-body">
+          <img src="icon/extention.png" alt="PatternFlow Extension UI Preview" class="ext-ui-img">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPAT BAR -->
+<div class="compat-bar">
+  <div class="compat-item"><span class="compat-check">✓</span> Adobe Illustrator CC 2017+</div>
+  <div class="compat-item"><span class="compat-check">✓</span> Windows EXE Installer</div>
+  <div class="compat-item"><span class="compat-check">✓</span> EPS · TIF · PDF · JPG Output</div>
+  <div class="compat-item"><span class="compat-check">✓</span> All-Over · Cutting · Nesting Modes</div>
+  <div class="compat-item"><span class="compat-check">✓</span> WhatsApp Support</div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">Output Formats</div></div>
+  <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">Setup Models</div></div>
+  <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Automated</div></div>
+  <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Manual Errors</div></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Core Features</div>
+      <h2 class="section-title">Everything built for<br>custom apparel production</h2>
+      <p class="section-sub">Four powerful systems working together to eliminate manual work from your workflow.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature-card wide">
+        <div>
+          <span class="feature-tag">Proprietary Technology</span>
+          <h3>Intelligent Auto-Nesting</h3>
+          <p>Three exclusive modes — <strong>ALL-OVER</strong>, <strong>CUTTING</strong>, and <strong>NESTING</strong> — automatically organize all jersey variations on the canvas. Maximize fabric usage, minimize waste, and cut production costs without touching a single artboard manually.</p>
+          <div class="format-pills" style="margin-top:1.25rem;">
+            <div class="fpill"><span class="dot" style="background:#D300FF"></span> All-Over Mode</div>
+            <div class="fpill"><span class="dot" style="background:#34E3F8"></span> Cutting Mode</div>
+            <div class="fpill"><span class="dot" style="background:#8800FF"></span> Nesting Mode</div>
+          </div>
+        </div>
+        <div>
+          <div class="nest-visual">
+            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;">Nested Jersey Layout</div>
+            <div class="nest-grid">
+              <div class="nest-item">XS<span class="nn">#7</span></div>
+              <div class="nest-item">S<span class="nn">#10</span></div>
+              <div class="nest-item">M<span class="nn">#3</span></div>
+              <div class="nest-item">L<span class="nn">#23</span></div>
+              <div class="nest-item">M<span class="nn">#8</span></div>
+              <div class="nest-item">XL<span class="nn">#1</span></div>
+              <div class="nest-item">S<span class="nn">#11</span></div>
+              <div class="nest-item">L<span class="nn">#9</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <span class="feature-tag">Automation</span>
+        <h3>Automated Sizing & Naming</h3>
+        <p>Every jersey is resized to its exact dimension automatically. Names and numbers are placed precisely — no manual alignment, no mistakes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🖨️</div>
+        <span class="feature-tag">Output</span>
+        <h3>Flexible Print Formats</h3>
+        <p>Export instantly in any format your printer requires with correct color modes and bleed settings applied.</p>
+        <div class="format-pills">
+          <div class="fpill"><span class="dot" style="background:#D300FF"></span> EPS</div>
+          <div class="fpill"><span class="dot" style="background:#8800FF"></span> TIF</div>
+          <div class="fpill"><span class="dot" style="background:#34E3F8"></span> PDF</div>
+          <div class="fpill"><span class="dot" style="background:rgba(255,255,255,0.4)"></span> JPG</div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <span class="feature-tag">Integration</span>
+        <h3>Seamless Data Integration</h3>
+        <p>Use the dedicated online Data Sheet to generate clean data lists that plug directly into PatternFlow — no complex JSON files needed.</p>
+        <a href="https://patterflowdatasheet.netlify.app/" class="datasheet-link">Open Data Sheet →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- RESOURCES SECTION -->
+<section id="resources" style="background: var(--surface); border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Resources</div>
+      <h2 class="section-title">Production-Ready Sublimation Assets</h2>
+      <p class="section-sub">Verified vector mockups and patterns designed to run directly through the automation engine.</p>
+    </div>
+
+    <div class="pattern-promo-card reveal" style="margin-top: 3.5rem;">
+      <div class="promo-left">
+        <span class="pb-badge" style="background: rgba(52,227,248,0.08); border-color: rgba(52,227,248,0.25); color: #34E3F8;">Secured Asset Vault</span>
+        <h3 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; margin-bottom: 1.5rem;">Verified Pattern Library</h3>
+        
+        <!-- Detailed info list targeting automation & security -->
+        <div class="resource-info-list">
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(211,0,255,0.3));">⚙️</div>
+            <div class="resource-info-text">
+              <h4>Optimized for PatternFlow Automation</h4>
+              <p>Every pattern matches the extension's auto-nesting presets for flawless sizing outputs without manual adjustments.</p>
+            </div>
+          </div>
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(52,227,248,0.3));">📐</div>
+            <div class="resource-info-text">
+              <h4>Precision Vector Blueprints</h4>
+              <p>Clean, fully-layered Adobe Illustrator (.AI) blueprints featuring accurate panels, neck ribs, collars, and sleeves.</p>
+            </div>
+          </div>
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(211,0,255,0.3));">🔒</div>
+            <div class="resource-info-text">
+              <h4>Secured Download Gateway</h4>
+              <p>Protected resource bank. Instantly authenticate using your active subscription credentials to download files securely.</p>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://patterflowpattern.netlify.app/" target="_blank" class="btn-primary" style="max-width: 280px; text-decoration: none; box-shadow: 0 4px 15px rgba(211,0,255,0.3);">
+          Explore Pattern Library →
+        </a>
+      </div>
+      <div class="promo-right" id="promo-shapes-area">
+        <!-- 3D Interacting Meta-Shapes updated from "Dropbox" to "Secured" -->
+        <div class="vector-pattern-shapes" id="promo-tilting-shapes">
+          <div class="v-shape s1">.AI <span>Illustrator</span></div>
+          <div class="v-shape s2">🔒 <span>Secured Vault</span></div>
+          <div class="v-shape s3">Jersey <span>Templates</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LAYOUTS SECTION -->
+<section id="layouts-section" style="background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Layouts</div>
+      <h2 class="section-title">Pre-Configured Printing Layouts</h2>
+      <p class="section-sub">Explore custom layout configurations optimized for roll efficiency and error-free printing outputs.</p>
+    </div>
+
+    <div class="pattern-promo-card reveal" style="margin-top: 3.5rem; background: linear-gradient(145deg, var(--surface) 0%, rgba(52,227,248,0.03) 100%); border-color: rgba(52,227,248,0.2);">
+      <div class="promo-left">
+        <span class="pb-badge" style="background: rgba(211,0,255,0.08); border-color: rgba(211,0,255,0.25); color: #D300FF;">Nesting Layout Presets</span>
+        <h3 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; margin-bottom: 1.5rem;">Explore Live Layout Options</h3>
+        
+        <div class="resource-info-list">
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(52,227,248,0.3));">📏</div>
+            <div class="resource-info-text">
+              <h4>Standardized Width Presets</h4>
+              <p>Pre-configured dimensions (36", 44", 60") matching sublimation printing rolls to avoid margin and fabric waste.</p>
+            </div>
+          </div>
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(211,0,255,0.3));">⚡</div>
+            <div class="resource-info-text">
+              <h4>Precise Alignment Presets</h4>
+              <p>Configured gaps and margins to fit front, back, sleeves, and collars seamlessly during batch generation.</p>
+            </div>
+          </div>
+          <div class="resource-info-item">
+            <div class="resource-info-icon" style="filter: drop-shadow(0 2px 8px rgba(52,227,248,0.3));">👁️</div>
+            <div class="resource-info-text">
+              <h4>Interactive Layout View</h4>
+              <p>Examine layouts and templates closely on our live viewer before running them in the PatternFlow plugin.</p>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://patterflowlayouts.netlify.app/" target="_blank" class="btn-primary" style="max-width: 280px; text-decoration: none; box-shadow: 0 4px 15px rgba(52,227,248,0.3); background: linear-gradient(90deg, #34E3F8, #8800FF);">
+          Browse Layout Gallery →
+        </a>
+      </div>
+      <div class="promo-right" id="layouts-shapes-area">
+        <!-- 3D Interacting Meta-Shapes for Layouts Section -->
+        <div class="vector-pattern-shapes" id="layouts-tilting-shapes">
+          <div class="v-shape s1" style="background: rgba(52,227,248,0.12); border-color: rgba(52,227,248,0.3); color: #34E3F8;">Roll 60" <span>Standard Width</span></div>
+          <div class="v-shape s2" style="background: rgba(211,0,255,0.12); border-color: rgba(211,0,255,0.3); color: #D300FF;">100% Fit <span>Zero Fabric Waste</span></div>
+          <div class="v-shape s3" style="background: var(--surface3); border-color: rgba(255,255,255,0.15);">Grid <span>Auto Align</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORT -->
+<section id="support">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Support</div>
+      <h2 class="section-title">We've got your back</h2>
+      <p class="section-sub">Expert help available whenever you need it — from installation to full production.</p>
+    </div>
+    <div class="support-grid reveal">
+      <div class="support-card"><div class="s-icon">💬</div><h3>WhatsApp Help Group</h3><p>Join our active community. Get tips, share setups, and get answers from the team and fellow professionals.</p><a href="https://chat.whatsapp.com/IDuARpYA54E4tT1RaY5I4u" class="s-link">Join Community →</a></div>
+      <div class="support-card"><div class="s-icon">🎧</div><h3>Direct Support</h3><p>Have a technical question or need installation help? Message our team directly for fast, personal assistance.</p><a href="http://wa.me/+15625100176" class="s-link">Message Support →</a></div>
+
+<div class="support-card"><div class="s-icon">📊</div><h3>Online Data Sheet</h3><p>Prepare your order data using the dedicated sheet. Clean, simple, and integrates directly with the extension.</p><a href="https://patterflowdatasheet.netlify.app/" class="s-link">Open Data Sheet →</a></div>
+<div class="support-card"><div class="s-icon">💰</div><h3>Pricing Details</h3><p>Browse all plans including Micro Start, Starter Flow, Pro Flow, Enterprise and Unlimited options.</p><a href="https://patterflowprice.netlify.app/" class="s-link">View Pricing →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label" style="justify-content:center;">Get Started Today</div>
+      <h2 class="section-title">Stop doing it manually.<br><span class="grad-text">Start printing smarter.</span></h2>
+      <p class="section-sub" style="margin:0 auto;text-align:center;">Download PatternFlow free and automate your entire jersey print workflow today.</p>
+<div class="cta-actions">
+        <a href="https://wa.me/15625100176" class="btn-primary-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Free (.EXE)
+        </a>
+        <a href="https://wa.me/15625100176" class="btn-ghost">Need help? Contact us →</a>
+      </div>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-top:1.25rem;">Compatible with Adobe Illustrator CC 2017 and above</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a href="#" class="footer-logo">
+    <img src="icon/logo.png" onerror="this.style.display='none'; document.getElementById('footer-fallback-mark').style.display='flex';" class="footer-logo-img" alt="PatternFlow Logo">
+    <div class="nav-logo-mark" id="footer-fallback-mark" style="width:22px;height:22px;font-size:0.65rem;display:none;align-items:center;justify-content:center;border-radius:6px;background:var(--grad);color:#fff;font-weight:800;margin-right:8px;">PF</div>
+    PatternFlow
+  </a>
+<ul class="footer-links">
+  <li><a href="https://patterflowuse.netlify.app/" target="_blank" rel="noopener">How to use</a></li>
+  <li><a href="https://patterflowlayouts.netlify.app/">Layouts</a></li>
+  <li><a href="https://patterflowprice.netlify.app/">Pricing</a></li>
+  <li><a href="https://patterflowdatasheet.netlify.app/">Data Sheet</a></li>
+  <li><a href="https://patterflowpattern.netlify.app/" target="_blank" rel="noopener">Pattern Library</a></li>
+  <li><a href="#support">Support</a></li>
+  </ul>
+  <small>© 2024 PatternFlow. All rights reserved.</small>
+</footer>
+
+<!-- loading Three.js for 3D visual grid -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+  // Reveal animations
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('visible'),i*80); obs.unobserve(e.target); } });
+  }, {threshold:0.1});
+  reveals.forEach(el=>obs.observe(el));
+
+  // Global mouse coordinates variables for tracking (-1 to 1)
+  let globalMouseX = 0;
+  let globalMouseY = 0;
+
+  window.addEventListener('mousemove', (e) => {
+    globalMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    globalMouseY = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+
+  // --- 3D THREE.JS CANVAS BACKGROUND ---
+  const container = document.getElementById('hero-3d-canvas');
+  if (container && window.innerWidth > 960) {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 100);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
+
+    // Grid details
+    const size = 16;
+    const divisions = 22;
+    const gridHelper = new THREE.GridHelper(size, divisions, 0x8800FF, 0x333444);
+    gridHelper.rotation.x = Math.PI / 3.2;
+    gridHelper.rotation.y = -Math.PI / 12;
+    gridHelper.position.set(0, -1, -2);
+    scene.add(gridHelper);
+
+    // Glowing Flowing particles in 3D
+    const particleCount = 65;
+    const pGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    const color1 = new THREE.Color('#D300FF'); // Pink/Purple
+    const color2 = new THREE.Color('#34E3F8'); // Cyan
+
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 12;     // X
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 8;  // Y
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;  // Z
+
+      const mixedColor = color1.clone().lerp(color2, Math.random());
+      colors[i * 3] = mixedColor.r;
+      colors[i * 3 + 1] = mixedColor.g;
+      colors[i * 3 + 2] = mixedColor.b;
+    }
+
+    pGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    pGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const pMaterial = new THREE.PointsMaterial({
+      size: 0.16,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.75,
+      blending: THREE.AdditiveBlending
+    });
+
+    const particles = new THREE.Points(pGeometry, pMaterial);
+    scene.add(particles);
+
+    camera.position.z = 8;
+
+    // Animation loop for 3D Background Canvas
+    const animate3D = () => {
+      requestAnimationFrame(animate3D);
+
+      const time = Date.now() * 0.001;
+      gridHelper.rotation.z = Math.sin(time * 0.1) * 0.1;
+
+      // Animate flowing particles
+      const positionsArr = particles.geometry.attributes.position.array;
+      for (let i = 0; i < particleCount; i++) {
+        const xIndex = i * 3;
+        const yIndex = i * 3 + 1;
+        positionsArr[yIndex] += Math.sin(time + positionsArr[xIndex]) * 0.004;
+      }
+      particles.geometry.attributes.position.needsUpdate = true;
+
+      // Smooth camera lag based on global mouse coordinates
+      camera.position.x += (globalMouseX * 1.5 - camera.position.x) * 0.05;
+      camera.position.y += (-globalMouseY * 1.5 - camera.position.y) * 0.05;
+      camera.lookAt(scene.position);
+
+      renderer.render(scene, camera);
+    };
+    
+    animate3D();
+
+    // Resize handling
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  }
+
+  // --- GLOBAL 3D CARD INTERACTIVE TILT & AUTO FLOAT ---
+  const card = document.getElementById('tilting-card');
+  
+  if (card && window.innerWidth > 960) {
+    let currentRotX = 8;     // Starting base rotation X
+    let currentRotY = -14;   // Starting base rotation Y
+
+    const updateCardPhysics = () => {
+      const targetRotY = -14 + (globalMouseX * 18);
+      const targetRotX = 8 - (globalMouseY * 18);
+
+      // Smooth linear interpolation (Lerp)
+      currentRotY += (targetRotY - currentRotY) * 0.08;
+      currentRotX += (targetRotX - currentRotX) * 0.08;
+
+      // Mathematical floating movement (Y-axis oscillation)
+      const floatTime = Date.now() * 0.0015;
+      const floatOffsetY = Math.sin(floatTime) * 10;
+
+      card.style.transform = `rotateY(${currentRotY}deg) rotateX(${currentRotX}deg) rotateZ(-1.5deg) translateY(${floatOffsetY}px)`;
+
+      requestAnimationFrame(updateCardPhysics);
+    };
+
+    updateCardPhysics();
+  }
+
+  // --- PROMO CARDS SHAPES GLOBAL PARALLAX TILT ---
+  const shapesContainer = document.getElementById('promo-tilting-shapes');
+  const layoutsShapesContainer = document.getElementById('layouts-tilting-shapes');
+  if (window.innerWidth > 960) {
+    let currentShapeRotX = 0;
+    let currentShapeRotY = 0;
+
+    const updatePromoShapes = () => {
+      // Gentle tilt based on global mouse coordinates
+      const targetRotY = globalMouseX * 12;
+      const targetRotX = -globalMouseY * 12;
+
+      currentShapeRotY += (targetRotY - currentShapeRotY) * 0.08;
+      currentShapeRotX += (targetRotX - currentShapeRotX) * 0.08;
+
+      if (shapesContainer) {
+        shapesContainer.style.transform = `rotateY(${currentShapeRotY}deg) rotateX(${currentShapeRotX}deg)`;
+      }
+      if (layoutsShapesContainer) {
+        layoutsShapesContainer.style.transform = `rotateY(${currentShapeRotY}deg) rotateX(${currentShapeRotX}deg)`;
+      }
+      requestAnimationFrame(updatePromoShapes);
+    };
+    updatePromoShapes();
+  }
+
+  (function () {
+    var btn = document.getElementById("navMenuBtn");
+    var menu = document.getElementById("sideMenu");
+    var backdrop = document.getElementById("sideMenuBackdrop");
+    var closeBtn = document.getElementById("sideMenuClose");
+    if (!btn || !menu || !backdrop) return;
+
+    function setOpen(open) {
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+      menu.classList.toggle("is-open", open);
+      backdrop.classList.toggle("is-open", open);
+      menu.setAttribute("aria-hidden", open ? "false" : "true");
+      backdrop.setAttribute("aria-hidden", open ? "false" : "true");
+      document.body.classList.toggle("side-menu-open", open);
+    }
+
+    function toggle() {
+      setOpen(btn.getAttribute("aria-expanded") !== "true");
+    }
+
+    btn.addEventListener("click", toggle);
+    if (closeBtn) closeBtn.addEventListener("click", function () { setOpen(false); });
+    backdrop.addEventListener("click", function () { setOpen(false); });
+    menu.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () { setOpen(false); });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+  })();
+</script>
+</body>
+</html>
