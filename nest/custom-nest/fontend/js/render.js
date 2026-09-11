@@ -215,8 +215,21 @@
         return '#2ec4b6';
     }
 
+    /** Engine X = across DIA, Y = along roll. Preview: rotate so fabric runs left→right like Sparrow. */
+    function toStrip(x, y, contentY0, xOff, yOff) {
+        return { x: xOff + (y - contentY0), y: yOff + x };
+    }
+
+    function rotPoly(pts, contentY0, xOff, yOff) {
+        var out = [], i;
+        for (i = 0; i < (pts || []).length; i++) {
+            out.push(toStrip(pts[i].x, pts[i].y, contentY0, xOff, yOff));
+        }
+        return out;
+    }
+
     /**
-     * One SVG, units = inches. Open in Illustrator to measure size and gap.
+     * One SVG, units = inches. Horizontal strip (DIA = height), same as Sparrow preview.
      */
     function buildSvg(result, pageFilter) {
         if (!result || !result.ok) {
@@ -229,61 +242,65 @@
         var dia = result.dia;
         var gap = 1.25;
         var titleH = 0.45;
-        var totalH = 0.4;
         var i;
+        var totalW = 0.3;
         for (i = 0; i < pages.length; i++) {
-            totalH += titleH + Math.max(pages[i].height, 1) + gap;
+            totalW += Math.max(pages[i].height, 1) + gap;
         }
-        if (!pages.length) totalH = 4;
-        var W = dia + 1.2;
-        var H = totalH + 0.3;
+        if (!pages.length) totalW = 8;
+        var W = totalW + 0.2;
+        var H = titleH + dia + 0.35;
         var out = [];
         out.push('<?xml version="1.0" encoding="UTF-8"?>');
         out.push('<svg xmlns="http://www.w3.org/2000/svg" version="1.1"');
         out.push(' width="' + W.toFixed(4) + 'in" height="' + H.toFixed(4) + 'in"');
         out.push(' viewBox="0 0 ' + W.toFixed(4) + ' ' + H.toFixed(4) + '"');
         out.push(' xml:space="preserve">');
-        out.push('<desc>PatternFlow Custom Nest. User units = inches. Measure size and gap in Illustrator.</desc>');
+        out.push('<desc>PatternFlow Custom Nest. Horizontal strip: X = fabric length, Y = DIA. Inches.</desc>');
         out.push('<rect width="' + W.toFixed(4) + '" height="' + H.toFixed(4) + '" fill="#ffffff"/>');
 
-        var y = 0.35;
-        var p, j, piece, all, ph;
+        var x = 0.15;
+        var yStrip = titleH;
+        var p, j, piece, all, ph, c, name;
         for (i = 0; i < pages.length; i++) {
             p = pages[i];
             ph = Math.max(p.height, 1);
             out.push('<g id="DOC-' + p.index + '">');
-            out.push('<text x="0.1" y="' + (y + 0.22) + '" font-family="Arial, sans-serif" font-size="0.28" fill="#222">DOC '
+            out.push('<text x="' + x.toFixed(4) + '" y="0.30" font-family="Arial, sans-serif" font-size="0.28" fill="#222">DOC '
                 + p.index + '  rows ' + p.rowFrom + '–' + p.rowTo + '  H='
                 + p.height.toFixed(3) + 'in  (' + (p.height * 0.0254).toFixed(3) + 'm)  DIA='
                 + dia.toFixed(2) + 'in  gap=' + result.minGap.toFixed(3) + 'in</text>');
-            y += titleH;
-            out.push('<rect x="0" y="' + y.toFixed(4) + '" width="' + dia.toFixed(4) + '" height="' + ph.toFixed(4)
-                + '" fill="#f7f7f7" stroke="#444" stroke-width="0.015"/>');
-            out.push('<line x1="' + dia.toFixed(4) + '" y1="' + y.toFixed(4) + '" x2="' + dia.toFixed(4)
-                + '" y2="' + (y + ph).toFixed(4) + '" stroke="#ff4d4d" stroke-width="0.03"/>');
-            out.push('<g transform="translate(0,' + (y - p.contentY0).toFixed(5) + ')">');
+            out.push('<rect x="' + x.toFixed(4) + '" y="' + yStrip.toFixed(4) + '" width="' + ph.toFixed(4)
+                + '" height="' + dia.toFixed(4) + '" fill="#f7f7f7" stroke="#444" stroke-width="0.015"/>');
+            out.push('<line x1="' + x.toFixed(4) + '" y1="' + (yStrip + dia).toFixed(4) + '" x2="'
+                + (x + ph).toFixed(4) + '" y2="' + (yStrip + dia).toFixed(4)
+                + '" stroke="#ff4d4d" stroke-width="0.03"/>');
             all = p.bodies.concat(p.sleeves);
             for (j = 0; j < all.length; j++) {
                 piece = all[j];
                 var fill = pieceFill(piece);
-                var name = (piece.label || piece.kind) + ' ' + piece.bbox.w.toFixed(2) + 'x' + piece.bbox.h.toFixed(2) + 'in';
+                name = (piece.label || piece.kind) + ' ' + piece.bbox.w.toFixed(2) + 'x' + piece.bbox.h.toFixed(2) + 'in';
                 out.push('<path id="' + esc(piece.label || piece.kind) + '-' + j + '"');
-                out.push(' d="' + polyToD(piece.points) + '"');
+                out.push(' d="' + polyToD(rotPoly(piece.points, p.contentY0, x, yStrip)) + '"');
                 out.push(' fill="' + fill + '" fill-opacity="0.42" stroke="' + (piece.overlap ? '#b00000' : '#111')
                     + '" stroke-width="0.02"');
                 out.push(' data-kind="' + esc(piece.kind) + '" data-size="' + esc(piece.size) + '"');
                 out.push(' data-width="' + piece.bbox.w.toFixed(4) + '" data-height="' + piece.bbox.h.toFixed(4) + '">');
                 out.push('<title>' + esc(name) + (piece.overlap ? ' OVERLAY' : '') + '</title>');
                 out.push('</path>');
-                out.push('<text x="' + (piece.bbox.x + piece.bbox.w * 0.5).toFixed(4) + '" y="'
-                    + (piece.bbox.y + piece.bbox.h * 0.5).toFixed(4) + '"');
+                c = toStrip(
+                    piece.bbox.x + piece.bbox.w * 0.5,
+                    piece.bbox.y + piece.bbox.h * 0.5,
+                    p.contentY0, x, yStrip
+                );
+                out.push('<text x="' + c.x.toFixed(4) + '" y="' + c.y.toFixed(4) + '"');
                 out.push(' font-family="Arial, sans-serif" font-size="0.22" text-anchor="middle" fill="#111">'
                     + esc(piece.label || piece.kind)
                     + (piece.rotation != null ? ' ' + piece.rotation + '°' : '')
                     + '</text>');
             }
-            out.push('</g></g>');
-            y += ph + gap;
+            out.push('</g>');
+            x += ph + gap;
         }
         out.push('</svg>');
         return out.join('\n');

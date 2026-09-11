@@ -51,8 +51,11 @@ if not exist "%~dp0nest\pc-server\config.yml" (
   exit /b 1
 )
 
-where cloudflared >nul 2>&1
-if errorlevel 1 (
+set "CF="
+where cloudflared >nul 2>&1 && set "CF=cloudflared"
+if not defined CF if exist "C:\Program Files (x86)\cloudflared\cloudflared.exe" set "CF=C:\Program Files (x86)\cloudflared\cloudflared.exe"
+if not defined CF if exist "C:\Program Files\cloudflared\cloudflared.exe" set "CF=C:\Program Files\cloudflared\cloudflared.exe"
+if not defined CF (
   echo cloudflared nai. SETUP-CLOUDFLARE-TUNNEL.bat chalan.
   pause
   exit /b 1
@@ -62,7 +65,7 @@ echo Starting Cloudflare Tunnel...
 echo nest-api.patternflow.fit  -^> 8765
 echo nesting-api.patternflow.fit -^> 8766
 echo.
-cloudflared tunnel --config "%~dp0nest\pc-server\config.yml" run
+"%CF%" tunnel --config "%~dp0nest\pc-server\config.yml" run
 echo.
 echo Tunnel bondho. Custom Nest / Nesting window alada close korun.
 pause

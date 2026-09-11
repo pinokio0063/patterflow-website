@@ -1,10 +1,18 @@
 ﻿[
-  {
-    "id": "polo",
-    "name": "polo",
-    "font": "patterns/polo/FRONT-01.svg",
-    "back": "patterns/polo/BACK-01.svg",
-    "sleeve": "patterns/polo/SHROT-SLVrib-01.svg",
-    "sleeveLong": "patterns/polo/LONG-SLV-rib01.svg"
-  }
+    {
+        "id":  "polo",
+        "name":  "polo",
+        "back":  "patterns/polo/BACK-01.svg",
+        "sleeveLong":  "patterns/polo/LONG-SLV-rib01.svg",
+        "sleeve":  "patterns/polo/SHROT-SLVrib-01.svg",
+        "font":  "patterns/polo/FRONT-01.svg"
+    },
+    {
+        "id":  "raglon",
+        "name":  "raglon",
+        "back":  null,
+        "sleeveLong":  null,
+        "sleeve":  null,
+        "font":  null
+    }
 ]
