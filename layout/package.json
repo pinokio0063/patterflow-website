@@ -1,0 +1,11 @@
+{
+  "name": "patternflow-setup-layout",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "svg:manifest": "node generate-manifest.js",
+    "prestart": "node generate-manifest.js",
+    "start": "npx --yes serve . -l 8000",
+    "dev": "npx --yes serve . -l 8000"
+  }
+}

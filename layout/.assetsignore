@@ -1,0 +1,5 @@
+generate-manifest.js
+package.json
+start.bat
+netlify.toml
+node_modules/

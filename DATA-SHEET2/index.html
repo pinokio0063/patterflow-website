@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0078d4">
+    <title>PatternFlow Pro | Professional Data Sheet</title>
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PDF Generation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-mode">
+
+    <div class="app-wrapper">
+        
+        <!-- Left Side: Sponsor Section -->
+        <aside class="side-panel left-side">
+            <div class="card sponsor-card">
+                <p class="section-title">SPONSOR</p>
+                <div class="img-container">
+                    <a href="https://assunnahfoundation.org/donate/regular" target="_blank">
+                        <img src="imh.png" alt="Sponsor Image">
+                    </a>
+                </div>
+                <p class="small-text">Support Our Project</p>
+            </div>
+        </aside>
+
+        <!-- Middle: Main Dashboard -->
+        <main class="main-body">
+            <header class="top-nav">
+                <!-- Left Action Buttons -->
+                <div class="nav-left">
+                    <button id="saveJsonBtn" class="btn btn-save">
+                        <i class="fas fa-save"></i> Save JSON
+                    </button>
+                    <button id="openJsonBtn" class="btn btn-open">
+                        <i class="fas fa-folder-open"></i> Open
+                    </button>
+                    <button id="printBtn" class="btn btn-print">
+                        <i class="fas fa-print"></i> Print PDF
+                    </button>
+                </div>
+
+                <!-- Center Logo & Name -->
+                <div class="brand-container">
+                    <img src="logo.ico" alt="logo" class="main-logo">
+                    <h1 class="brand-name">PatternFlow</h1>
+                </div>
+                
+                <!-- Right Settings Button -->
+                <div class="nav-right">
+                    <button id="settingsBtn" class="btn btn-settings" title="User Guide & Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+                </div>
+            </header>
+
+            <!-- Table Wrapper for Table & Right-side Add Column Button -->
+            <div class="table-content-wrapper">
+                <!-- Data Table Container -->
+                <div class="sheet-container card">
+                    <div class="scroll-area">
+                        <div id="zoom-box">
+                            <table id="data-table">
+                                <thead>
+                                    <tr>
+
+
+                                        <th class="sl-col">SL</th>
+                                        <th class="name-col">NAME</th>
+                                        <th class="num-col">NUMBER</th>
+                                        <th class="size-col">SIZE</th>
+                                        <th class="slv-col">FULL SLV</th>
+                                        <th class="slv-col">HALF SLV</th>
+                                        <th class="pant-col">PANT-SIZE</th>
+                                        <th class="comments-col">COMMENTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    <!-- Generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vertical Green Add Column Button -->
+                <button id="addColBtn" class="btn-vertical-add" title="Add Custom Column">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+
+            <footer class="bottom-nav">
+                <button id="addRowBtn" class="btn btn-add">
+                    <i class="fas fa-plus"></i> Add 50 Rows
+                </button>
+<!-- Replacing Total Rows with Clean Button -->
+                <button id="cleanBtn" class="btn btn-clean">
+                    <i class="fas fa-trash-alt"></i> Clean All Data
+                </button>
+            </footer>
+        </main>
+
+        <!-- Right Side: Quick Import Section -->
+        <aside class="side-panel right-side">
+            <div class="card import-card">
+                <div class="import-header">
+                    <i class="fas fa-bolt"></i>
+                    <h2>Quick Import</h2>
+                </div>
+                <p class="format-hint">Paste list and press Enter to load</p>
+                <textarea id="bulkInput" placeholder="Enter data here..."></textarea>
+                
+                <!-- NEW: Warning Message Before Load Button -->
+                <div class="import-warning">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Quick Import may make mistakes, so double-check outputs.</span>
+                </div>
+
+                <button id="processBulkBtn" class="btn btn-success">Load to Sheet</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-bar">
+        <button id="zoomOutBtn"><i class="fas fa-minus"></i></button>
+        <span id="zoomLevelDisplayText">100%</span>
+        <button id="zoomInBtn"><i class="fas fa-plus"></i></button>
+    </div>
+
+    <!-- User Guide & Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Settings & Info</h2>
+                <span class="close-settings">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item" style="justify-content: space-between;">
+                    <label>App Theme:</label>
+                    <button id="themeToggle" class="btn">Toggle Dark/Light Mode</button>
+                </div>
+                
+                <!-- NEW: Terms & Conditions Section inside Settings -->
+                <div class="setting-item" style="justify-content: space-between; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <label>Rules & Privacy:</label>
+                    <button id="tcBtn" class="btn">
+                        <i class="fas fa-file-contract"></i> View Terms & Conditions
+                    </button>
+                </div>
+
+                <hr style="margin: 20px 0; border: none; border-top: 1px dashed var(--border);">
+                
+                <div class="guide-container">
+                    <!-- English Guide -->
+                    <div class="guide-section">
+                        <h3><img src="https://flagcdn.com/w20/gb.png" width="18"> Quick Guide (English)</h3>
+                        <ul>
+                            <li><strong>Auto Fill:</strong> Type <code>10*XL</code> in Size cell and press Enter.</li>
+                            <li><strong>Range Select:</strong> Click a cell, hold <strong>Shift</strong> and click another.</li>
+                            <li><strong>Bulk Sleeve:</strong> Select SLV cells and press <strong>Enter</strong> to fill.</li>
+                            <li><strong>Delete:</strong> Select cells and press <strong>Delete</strong> key to clear.</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Bengali Guide -->
+                    <div class="guide-section" style="margin-top: 20px;">
+                        <h3><img src="https://flagcdn.com/w20/bd.png" width="18"> ব্যবহারের নির্দেশিকা (Bengali)</h3>
+                        <ul>
+                            <li><strong>অটো ফিল:</strong> সাইজ ঘরে <code>10*XL</code> লিখে এন্টার দিন।</li>
+                            <li><strong>রেঞ্জ সিলেক্ট:</strong> একটি ঘরে ক্লিক করে <strong>Shift</strong> চেপে অন্য ঘরে ক্লিক করুন।</li>
+                            <li><strong>মুছে ফেলা:</strong> ঘর সিলেক্ট করে কিবোর্ড থেকে <strong>Delete</strong> চাপুন।</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal (For PDF View) -->
+    <div id="tcModal" class="modal">
+        <div class="modal-content card" style="width: 800px; height: 85vh; display: flex; flex-direction: column; padding: 15px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Terms & Conditions</h2>
+                <span class="close-tc" style="font-size: 28px; cursor: pointer;">&times;</span>
+            </div>
+            <div class="modal-body" style="flex: 1; overflow: hidden; margin-top: 10px;">
+                <iframe src="https://drive.google.com/file/d/1wGs-hZDqNN9gFPbzFi8WvKfzyg67pjql/preview" width="100%" height="100%" style="border: none; border-radius: 6px;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Print Settings Modal -->
+    <div id="printModal" class="modal">
+        <div class="modal-content card" style="width: 420px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-print"></i> PDF Print Settings</h2>
+                <span class="close-print">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <label>Jersey Image:</label>
+                    <input type="file" id="jerseyImageInput" accept="image/*" class="btn" style="width: 100%;">
+                </div>
+                <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <label>Title:</label>
+                    <input type="text" id="printTitle" placeholder="Ex: Team Tigers" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <label>Fabric Type:</label>
+                    <input type="text" id="fabricName" placeholder="Ex: Mesh" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+                </div>
+                <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <label>Sleeve Rib:</label>
+                    <select id="sleeveRib" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); color: var(--text-main);">
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </div>
+                <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                    <label>Description/Notes:</label>
+                    <textarea id="jerseyDesc" placeholder="Any special instructions..." style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; height: 60px; resize: none;"></textarea>
+                </div>
+                <button id="startPrint" class="btn btn-save" style="width: 100%; justify-content: center; margin-top: 10px;">
+                    Generate PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

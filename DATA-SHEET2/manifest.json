@@ -1,0 +1,15 @@
+{
+  "name": "PatternFlow Pro Data Sheet",
+  "short_name": "PatternFlow",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0078d4",
+  "icons": [
+    {
+      "src": "./logo.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

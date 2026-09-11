@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatternFlow — Nesting & Layout Flow Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #07080d;
+  --white: #ffffff;
+  --p1: #D300FF;
+  --p2: #8800FF;
+  --p3: #34E3F8;
+  --grad: linear-gradient(135deg, #D300FF 0%, #8800FF 50%, #34E3F8 100%);
+  --grad-btn: linear-gradient(90deg, #D300FF, #8800FF);
+  --surface: #0e0f17;
+  --surface2: #13141f;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(211,0,255,0.25);
+  --text-muted: rgba(255,255,255,0.45);
+  --text-secondary: rgba(255,255,255,0.7);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --max-w-modes: 1280px;
+  --max-w-panel: 1680px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body { background: var(--black); color: var(--white); font-family: var(--font-body); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+.bg-glow {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 50% at 10% 20%, rgba(211,0,255,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 90% 80%, rgba(52,227,248,0.06) 0%, transparent 70%);
+  animation: glowDrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes glowDrift {
+  0% { opacity: 0.85; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes itemIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(255,255,255,0.1); }
+  50% { border-color: rgba(211,0,255,0.18); }
+}
+
+/* NAV */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4rem; height: 64px;
+  background: rgba(7,8,13,0.85); backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  animation: fadeUp 0.55s var(--ease-out) both;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--white); font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; }
+.nav-logo-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #fff; }
+.nav-back-btn {
+  font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;
+  border: 1px solid var(--border); padding: 0.4rem 1.15rem; border-radius: 999px;
+  transition: border-color 0.25s, color 0.25s, transform 0.25s var(--ease-out);
+}
+.nav-back-btn:hover { border-color: var(--border-accent); color: var(--white); transform: translateX(-2px); }
+
+header { text-align: center; padding: 1rem 1.5rem 0.5rem; max-width: 800px; margin: 0 auto; }
+header h1 { font-family: var(--font-display); font-size: clamp(1.85rem, 3.2vw, 2.6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; }
+header .reveal { display: inline-block; animation: fadeUp 0.65s var(--ease-out) both; }
+header .reveal:nth-child(2) { animation-delay: 0.1s; }
+header .subtitle { margin-top: 0.4rem; color: var(--text-muted); font-size: 0.95rem; animation: fadeUp 0.65s var(--ease-out) 0.2s both; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.explorer-section { margin: 0 auto 1.5rem; animation: fadeUp 0.65s var(--ease-out) 0.15s both; }
+.modes-selector {
+  display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: stretch; gap: 0.55rem;
+  max-width: var(--max-w-modes); margin: 0 auto 0.4rem; padding: 0 1.5rem; width: 100%;
+}
+.mode-card {
+  flex: 0 1 auto; width: 188px; max-width: 188px;
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 0.7rem 0.9rem; cursor: pointer;
+  transition: transform 0.3s var(--ease-out), border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.mode-card h3 { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+.mode-card p {
+  color: var(--text-muted); font-size: 0.62rem; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mode-card:hover { transform: translateY(-3px); border-color: rgba(211,0,255,0.2); box-shadow: 0 10px 32px rgba(211,0,255,0.1); }
+.mode-card:active { transform: translateY(-1px) scale(0.99); }
+.mode-card.active {
+  border-color: var(--p1); background: rgba(211,0,255,0.05);
+  box-shadow: 0 0 0 1px rgba(211,0,255,0.2), 0 8px 28px rgba(211,0,255,0.1);
+}
+
+.preview-panel {
+  width: 100%; max-width: min(96vw, var(--max-w-panel)); margin: 0 auto;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 0.85rem 1rem; position: relative;
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); padding-bottom: 0.45rem; margin-bottom: 0.55rem; min-height: auto;
+}
+.panel-header h2 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; transition: opacity 0.2s; }
+.panel-header h2.is-fading { opacity: 0; }
+
+.sub-tabs-container {
+  display: flex; position: relative;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 6px; gap: 0;
+}
+.sub-tab-indicator {
+  position: absolute; top: 6px; bottom: 6px; left: 6px;
+  width: 0; border-radius: 8px; background: var(--grad-btn);
+  box-shadow: 0 4px 15px rgba(211,0,255,0.3);
+  transition: left 0.35s var(--ease-out), width 0.35s var(--ease-out);
+  pointer-events: none; z-index: 0;
+}
+.sub-tab {
+  position: relative; z-index: 1; background: transparent; border: none;
+  color: var(--text-secondary); font-size: 1rem; font-weight: 700;
+  padding: 0.8rem 2.5rem; border-radius: 8px; cursor: pointer;
+  transition: color 0.25s; min-width: 150px;
+}
+.sub-tab.active { color: var(--white); background: transparent; box-shadow: none; }
+
+.visual-workspace {
+  background-color: #05060a;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 0.5rem;
+  animation: borderPulse 5s ease-in-out infinite;
+}
+.visual-workspace.is-nesting-white {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: rgba(7,8,13,0.12);
+  animation: none;
+  min-height: 560px;
+  padding: 0.65rem;
+}
+
+.gallery-container {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; width: 100%;
+  transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out);
+}
+.gallery-container.is-switching { opacity: 0; transform: translateY(6px); pointer-events: none; }
+
+.gallery-item {
+  position: relative; background: #fff; border-radius: 8px; overflow: hidden;
+  aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center;
+  cursor: zoom-in;
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+  animation: itemIn 0.45s var(--ease-out) both;
+}
+.gallery-item:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(211,0,255,0.18); }
+.gallery-item img { width: 100%; height: 100%; object-fit: contain; padding: 10px; transition: transform 0.35s var(--ease-out); }
+.gallery-item:hover img { transform: scale(1.03); }
+.gallery-item::after {
+  content: '⊕'; position: absolute; bottom: 10px; right: 10px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(7,8,13,0.75); color: var(--p3);
+  font-size: 14px; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: scale(0.8);
+  transition: opacity 0.25s, transform 0.25s var(--ease-out);
+}
+.gallery-item:hover::after { opacity: 1; transform: scale(1); }
+
+.gallery-container.is-svg-gallery {
+  grid-template-columns: 1fr !important;
+  width: 100%;
+  gap: 0;
+}
+.gallery-item.is-svg {
+  aspect-ratio: auto;
+  min-height: 520px;
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.gallery-item.nesting-svg-item {
+  position: relative;
+  cursor: default;
+  display: block;
+}
+.gallery-item.nesting-svg-item::after { display: none; }
+.gallery-item.nesting-svg-item:hover { transform: none; box-shadow: none; }
+.nesting-svg-stage {
+  width: 100%;
+  min-height: 520px;
+  height: 520px;
+  max-height: none;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: #ffffff !important;
+}
+.nesting-svg-stage svg {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: 100% !important;
+  display: block;
+  background: #ffffff !important;
+  object-fit: contain;
+}
+.nesting-svg-stage .nesting-status {
+  color: #666; font-size: 0.95rem; padding: 1.5rem; text-align: center;
+}
+.nesting-svg-label {
+  position: absolute; bottom: 10px; left: 12px;
+  font-size: 0.72rem; color: rgba(7,8,13,0.65);
+  background: rgba(255,255,255,0.92); border: 1px solid rgba(7,8,13,0.12);
+  padding: 0.25rem 0.6rem; border-radius: 6px;
+  pointer-events: none; z-index: 2;
+}
+
+.lightbox-content.is-svg-preview {
+  background: #ffffff;
+  max-width: 95%;
+  border: 1px solid var(--border);
+}
+
+/* CUSTOM MESSAGE BOX */
+.custom-message-box {
+  max-width: 650px; margin: 150px auto; text-align: center; padding: 3rem;
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  animation: itemIn 0.55s var(--ease-out) both;
+}
+.custom-message-box h4 { font-family: var(--font-display); font-size: 2rem; color: var(--p3); margin-bottom: 1rem; }
+.custom-message-box p { color: var(--text-secondary); line-height: 1.8; font-size: 1.1rem; }
+
+/* CUSTOMIZATION NOTE */
+.customization-note {
+  background: linear-gradient(90deg, rgba(20,21,33,0) 0%, rgba(211,0,255,0.05) 50%, rgba(20,21,33,0) 100%);
+  padding: 0.75rem 1rem; text-align: center; border-top: 1px solid var(--border); margin-top: 0.35rem;
+}
+.customization-note p { font-size: 0.95rem; color: var(--text-secondary); }
+.customization-note strong { color: var(--p3); font-family: var(--font-display); }
+
+/* LIGHTBOX */
+.lightbox {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.97);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 0.28s ease, visibility 0.28s;
+}
+.lightbox.active { opacity: 1; visibility: visible; pointer-events: auto; }
+.lightbox-content {
+  max-width: 85%; max-height: 85%; object-fit: contain; background: white;
+  cursor: grab; border-radius: 4px;
+  transition: transform 0.1s ease-out, opacity 0.28s ease;
+  opacity: 0;
+}
+.lightbox.active .lightbox-content { opacity: 1; }
+.lightbox-close {
+  position: fixed; top: 25px; right: 35px; font-size: 3.5rem; color: #fff;
+  background: none; border: none; cursor: pointer; z-index: 1010;
+  opacity: 0.7; transition: opacity 0.2s, transform 0.2s;
+}
+.lightbox-close:hover { opacity: 1; transform: scale(1.08); }
+
+@media (min-width: 1600px) {
+  :root { --max-w-panel: 1760px; }
+  .gallery-container { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (max-width: 1200px) {
+  .gallery-container { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 960px) {
+  nav { padding: 0 1.25rem; }
+  .modes-selector { flex-direction: column; align-items: center; }
+  .mode-card { width: 100%; max-width: 320px; }
+  .gallery-container { grid-template-columns: repeat(2, 1fr); }
+  .panel-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .sub-tab { min-width: unset; flex: 1; padding: 0.75rem 1rem; font-size: 0.9rem; }
+  .visual-workspace { padding: 0.75rem; min-height: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .bg-glow { animation: none; }
+  .visual-workspace { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<nav>
+  <a href="https://patternflow.fit/" class="nav-logo"><div class="nav-logo-mark">PF</div><span>PatternFlow Guide</span></a>
+  <a href="https://patternflow.fit/" class="nav-back-btn">← Back to Main Site</a>
+</nav>
+
+<header>
+  <h1><span class="reveal">Engine Setup</span><br><span class="reveal grad-text">Modes & Layouts</span></h1>
+  <p class="subtitle">Explore production-ready nesting layouts for your workflow</p>
+</header>
+
+<section class="explorer-section">
+  <div class="modes-selector">
+    <div class="mode-card active" onclick="switchFlow('flow-1')" id="card-flow-1">
+      <h3>FLOW-1</h3>
+      <p>All-Over Roll Nesting</p>
+    </div>
+    <div class="mode-card" onclick="switchFlow('flow-2')" id="card-flow-2">
+      <h3>FLOW-2</h3>
+      <p>Compact Grid Structures</p>
+    </div>
+    <div class="mode-card" onclick="switchFlow('flow-3')" id="card-flow-3">
+      <h3>CUSTOM-FLOW</h3>
+      <p>Bespoke Templates</p>
+    </div>
+    <div class="mode-card" onclick="switchFlow('flow-4')" id="card-flow-4">
+      <h3>NASTING</h3>
+      <p>Nesting Patterns</p>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+    <div class="panel-header">
+      <h2 id="preview-title">FLOW-1 Layout Model</h2>
+      <div class="sub-tabs-container" id="sub-tabs-wrapper">
+        <span class="sub-tab-indicator" id="sub-tab-indicator"></span>
+        <button class="sub-tab active" id="sub-tab-half" onclick="switchSubCategory('half')">Half Sleeve</button>
+        <button class="sub-tab" id="sub-tab-full" onclick="switchSubCategory('full')">Full Sleeve</button>
+      </div>
+    </div>
+
+    <div class="visual-workspace">
+      <div id="gallery-workspace" class="gallery-container"></div>
+    </div>
+
+    <div class="customization-note">
+      <p>💡 <strong>Production Note:</strong> The canvas dimensions for every layout flow are fully <strong>customizable</strong> to match your specific hardware and textile requirements.</p>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close preview">&times;</button>
+  <img class="lightbox-content" id="lightbox-img" src="" alt="Layout preview">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script>
+const flowData = {
+  'flow-1': {
+    title: 'FLOW-1 Layout Model',
+    folder: 'FLOW-1',
+    hasSubCategories: true,
+    half: ['1.1.jpg', '1.2.jpg', '5.1.jpg', '5.2.jpg', '5.3.jpg', '6.1.jpg', '8.jpg', '9.jpg', '6.2.jpg'],
+    full: ['2.jpg', '3.1.jpg', '3.2.jpg', '4.1.jpg', '4.2.jpg', '4.3.jpg', '7.jpg']
+  },
+  'flow-2': {
+    title: 'FLOW-2 Layout Model',
+    folder: 'FLOW-2',
+    hasSubCategories: false,
+    images: ['1.jpg', '2.jpg', '3.jpg', '4.jpg']
+  },
+  'flow-3': {
+    title: 'CUSTOM-FLOW Engine',
+    hasSubCategories: false,
+    isCustom: true
+  },
+  'flow-4': {
+    title: 'NASTING Layout Model',
+    folder: 'NESTING-SVG',
+    hasSubCategories: false,
+    isSvg: true,
+    images: ['2.svg', '3.svg']
+  }
+};
+
+let activeFlow = 'flow-1';
+let activeSubCategory = 'half';
+let isRendering = false;
+let isInitialRender = true;
+
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lightbox-img');
+const galleryContainer = document.getElementById('gallery-workspace');
+const previewTitle = document.getElementById('preview-title');
+const subTabIndicator = document.getElementById('sub-tab-indicator');
+let nestingTimeline = null;
+let nestingRunId = 0;
+const NESTING_GAP_SEC = 1;
+const PREVIEW_QUALITY = 0.3;
+const PREVIEW_MAX_WIDTH = 720;
+const previewCache = new Map();
+const PLACEHOLDER_IMG = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTUwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+";
+
+function createPreviewSrc(fullPath) {
+  if (previewCache.has(fullPath)) return Promise.resolve(previewCache.get(fullPath));
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, PREVIEW_MAX_WIDTH / img.naturalWidth);
+        const width = Math.max(1, Math.round(img.naturalWidth * scale));
+        const height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const preview = canvas.toDataURL('image/jpeg', PREVIEW_QUALITY);
+        previewCache.set(fullPath, preview);
+        resolve(preview);
+      } catch (err) {
+        console.warn('Preview compress failed, using original:', fullPath, err);
+        resolve(fullPath);
+      }
+    };
+    img.onerror = () => resolve(PLACEHOLDER_IMG);
+    img.src = fullPath;
+  });
+}
+
+function shuffle(array) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function getSvgDimensions(svg) {
+  const viewBox = svg.getAttribute('viewBox');
+  if (viewBox) {
+    const parts = viewBox.split(/[\s,]+/).map(Number);
+    if (parts.length === 4 && parts.every(n => !Number.isNaN(n))) {
+      return { width: parts[2], height: parts[3] };
+    }
+  }
+  return {
+    width: parseFloat(svg.getAttribute('width') || '800'),
+    height: parseFloat(svg.getAttribute('height') || '600')
+  };
+}
+
+function parseNestingSvg(svgText) {
+  const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+  if (doc.querySelector('parsererror')) throw new Error('Invalid SVG');
+  const svg = doc.documentElement;
+  if (svg.tagName.toLowerCase() !== 'svg') throw new Error('Invalid SVG');
+
+  const clonedSvg = svg.cloneNode(true);
+  clonedSvg.classList.add('anim-svg');
+  const paths = Array.from(clonedSvg.querySelectorAll('path'));
+  if (!paths.length) throw new Error('No path items in SVG');
+
+  const itemGroups = [];
+  paths.forEach((path, index) => {
+    const parent = path.parentNode;
+    if (!parent) return;
+
+    // Ensure shapes stay visible on white background
+    if (!path.getAttribute('fill') && !path.style.fill) {
+      path.setAttribute('fill', '#111111');
+    }
+
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    group.classList.add('anim-item');
+    group.setAttribute('data-index', String(index));
+    parent.insertBefore(group, path);
+    group.appendChild(path);
+    itemGroups.push(group);
+  });
+
+  if (!clonedSvg.getAttribute('viewBox')) {
+    const { width, height } = getSvgDimensions(clonedSvg);
+    clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  const { width, height } = getSvgDimensions(clonedSvg);
+  clonedSvg.removeAttribute('width');
+  clonedSvg.removeAttribute('height');
+  clonedSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  clonedSvg.style.width = '100%';
+  clonedSvg.style.height = 'auto';
+  clonedSvg.style.background = '#ffffff';
+
+  return { svgElement: clonedSvg, itemGroups, width, height };
+}
+
+function stopNestingSequence() {
+  nestingRunId += 1;
+  if (nestingTimeline) {
+    nestingTimeline.kill();
+    nestingTimeline = null;
+  }
+  if (typeof gsap !== 'undefined') {
+    gsap.killTweensOf('.anim-item');
+    gsap.set('.anim-item', { clearProps: 'transform,x,y' });
+  }
+}
+
+function playNestingAnimation(itemGroups, svgWidth) {
+  return new Promise((resolve) => {
+    if (nestingTimeline) {
+      nestingTimeline.kill();
+      nestingTimeline = null;
+    }
+
+    if (!itemGroups.length) {
+      resolve();
+      return;
+    }
+
+    if (typeof gsap === 'undefined') {
+      console.warn('GSAP missing — showing static SVG');
+      resolve();
+      return;
+    }
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) {
+      gsap.set(itemGroups, { x: 0, y: 0 });
+      resolve();
+      return;
+    }
+
+    // Reset to final position first, then animate from the right
+    gsap.set(itemGroups, { x: 0, y: 0, force3D: false });
+    const shuffled = shuffle(itemGroups);
+    const timeline = gsap.timeline({
+      onComplete: () => {
+        gsap.set(itemGroups, { x: 0, y: 0 });
+        resolve();
+      }
+    });
+
+    shuffled.forEach((group, index) => {
+      const startOffset = svgWidth + 80 + Math.random() * 220;
+      timeline.fromTo(
+        group,
+        { x: startOffset },
+        {
+          x: 0,
+          duration: 0.85 + Math.random() * 0.45,
+          ease: 'power2.out'
+        },
+        index * 0.045 + Math.random() * 0.2
+      );
+    });
+
+    nestingTimeline = timeline;
+  });
+}
+
+async function loadSvgText(relativePath) {
+  const url = new URL(relativePath, window.location.href).href;
+
+  try {
+    const response = await fetch(url);
+    if (response.ok) return await response.text();
+  } catch (_) {}
+
+  try {
+    const text = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.overrideMimeType('text/xml');
+      xhr.open('GET', url, true);
+      xhr.onload = () => {
+        if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 0) {
+          xhr.responseText ? resolve(xhr.responseText) : reject();
+        } else reject();
+      };
+      xhr.onerror = reject;
+      xhr.send();
+    });
+    if (text) return text;
+  } catch (_) {}
+
+  return new Promise((resolve, reject) => {
+    const obj = document.createElement('object');
+    obj.type = 'image/svg+xml';
+    obj.data = url;
+    obj.setAttribute('aria-hidden', 'true');
+    obj.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+    const cleanup = () => obj.remove();
+    const timeout = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 12000);
+
+    obj.onload = () => {
+      clearTimeout(timeout);
+      try {
+        const root = obj.contentDocument?.documentElement;
+        if (!root || root.nodeName.toLowerCase() !== 'svg') {
+          cleanup();
+          reject(new Error('invalid svg'));
+          return;
+        }
+        const text = new XMLSerializer().serializeToString(root);
+        cleanup();
+        resolve(text);
+      } catch (e) {
+        cleanup();
+        reject(e);
+      }
+    };
+    obj.onerror = () => { clearTimeout(timeout); cleanup(); reject(new Error('object error')); };
+    document.body.appendChild(obj);
+  });
+}
+
+function extractSvgNames(text) {
+  if (!text) return [];
+  try {
+    const list = JSON.parse(text);
+    if (Array.isArray(list)) {
+      return list.filter((name) => typeof name === 'string' && /\.svg$/i.test(name));
+    }
+  } catch (_) {}
+  const matches = text.match(/[\w.\-]+\.svg/gi);
+  return matches ? [...new Set(matches)] : [];
+}
+
+async function loadNestingManifest(folder) {
+  const url = new URL(`./${folder}/manifest.json?t=${Date.now()}`, window.location.href).href;
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (response.ok) {
+      const names = extractSvgNames(await response.text());
+      if (names.length) return names;
+    }
+  } catch (_) {}
+  return [];
+}
+
+async function resolveNestingFiles(folder, fallbackImages = []) {
+  const fromManifest = await loadNestingManifest(folder);
+  const names = [...new Set([...(fromManifest || []), ...(fallbackImages || [])])]
+    .filter((name) => typeof name === 'string' && /\.svg$/i.test(name));
+
+  const playable = [];
+  for (const fileName of names) {
+    try {
+      const text = await loadSvgText(`./${folder}/${fileName}`);
+      if (text && text.includes('<svg')) playable.push({ fileName, text });
+    } catch (err) {
+      console.warn('Skipping missing SVG:', fileName, err);
+    }
+  }
+  return playable;
+}
+
+function waitSeconds(seconds) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
+async function runNestingSequence(stage, label, playable, runId) {
+  if (!playable.length) {
+    stage.innerHTML = '<p class="nesting-status">No SVG found in NESTING-SVG.<br>Add .svg files, then run: npm run svg:manifest</p>';
+    if (label) label.textContent = '';
+    return;
+  }
+
+  while (runId === nestingRunId && activeFlow === 'flow-4') {
+    for (const item of playable) {
+      if (runId !== nestingRunId || activeFlow !== 'flow-4') return;
+
+      try {
+        const parsed = parseNestingSvg(item.text);
+        if (runId !== nestingRunId || activeFlow !== 'flow-4') return;
+
+        stage.innerHTML = '';
+        stage.appendChild(parsed.svgElement);
+        if (label) label.textContent = `${item.fileName} · ${parsed.itemGroups.length} items`;
+
+        await playNestingAnimation(parsed.itemGroups, parsed.width);
+        if (runId !== nestingRunId || activeFlow !== 'flow-4') return;
+
+        await waitSeconds(NESTING_GAP_SEC);
+      } catch (err) {
+        console.error('Nesting SVG sequence error:', item.fileName, err);
+        if (runId !== nestingRunId) return;
+        stage.innerHTML = `<p class="nesting-status">Failed: ${item.fileName}<br>${err.message || err}</p>`;
+        await waitSeconds(NESTING_GAP_SEC);
+      }
+    }
+  }
+}
+
+async function mountNestingSequence(container, label, folder, fallbackImages) {
+  // Capture current run after stopNestingSequence() already bumped the id
+  const runId = nestingRunId;
+  container.innerHTML = '<p class="nesting-status">Loading SVG...</p>';
+
+  try {
+    const playable = await resolveNestingFiles(folder, fallbackImages);
+    if (runId !== nestingRunId) return;
+    await runNestingSequence(container, label, playable, runId);
+  } catch (err) {
+    if (runId !== nestingRunId) return;
+    console.error(err);
+    container.innerHTML = `<p class="nesting-status">SVG load failed<br>${err.message || err}</p>`;
+  }
+}
+
+function updateSubTabIndicator() {
+  const activeTab = document.querySelector('.sub-tab.active');
+  const wrapper = document.getElementById('sub-tabs-wrapper');
+  if (!activeTab || !wrapper || wrapper.style.display === 'none') return;
+  subTabIndicator.style.width = activeTab.offsetWidth + 'px';
+  subTabIndicator.style.left = activeTab.offsetLeft + 'px';
+}
+
+function switchFlow(modeKey) {
+  if (activeFlow === modeKey) return;
+  activeFlow = modeKey;
+  isRendering = false;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  document.getElementById(`card-${modeKey}`).classList.add('active');
+  document.getElementById('sub-tabs-wrapper').style.display = flowData[modeKey].hasSubCategories ? 'flex' : 'none';
+  renderWorkspace();
+}
+
+function switchSubCategory(subKey) {
+  if (activeSubCategory === subKey || isRendering) return;
+  activeSubCategory = subKey;
+  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`sub-tab-${subKey}`).classList.add('active');
+  updateSubTabIndicator();
+  renderWorkspace();
+}
+
+function buildGalleryContent(data) {
+  stopNestingSequence();
+
+  const workspaceEl = document.querySelector('.visual-workspace');
+  if (workspaceEl) workspaceEl.classList.toggle('is-nesting-white', !!data.isSvg);
+
+  if (data.isCustom) {
+    galleryContainer.classList.remove('is-svg-gallery');
+    galleryContainer.style.display = 'block';
+    galleryContainer.innerHTML = '<div class="custom-message-box"><h4>Architect Your Own Workspace</h4><p>The Custom Flow engine is designed for total creative autonomy. Build bespoke nesting configurations from scratch.</p></div>';
+    return;
+  }
+
+  galleryContainer.style.display = 'grid';
+  galleryContainer.classList.toggle('is-svg-gallery', !!data.isSvg);
+  galleryContainer.innerHTML = '';
+  const currentImages = (data.hasSubCategories ? data[activeSubCategory] : data.images).filter(Boolean);
+  const folderPath = data.hasSubCategories ? `${data.folder}/${activeSubCategory}` : data.folder;
+
+  if (data.isSvg) {
+    const div = document.createElement('div');
+    div.className = 'gallery-item is-svg nesting-svg-item';
+    const stage = document.createElement('div');
+    stage.className = 'nesting-svg-stage';
+    stage.style.background = '#ffffff';
+    const label = document.createElement('div');
+    label.className = 'nesting-svg-label';
+    div.appendChild(stage);
+    div.appendChild(label);
+    galleryContainer.appendChild(div);
+    mountNestingSequence(stage, label, data.folder, data.images || []);
+    return;
+  }
+
+  currentImages.forEach((fileName, index) => {
+    const fullPath = `${folderPath}/${fileName}`;
+    const div = document.createElement('div');
+    div.className = 'gallery-item';
+    div.style.animationDelay = `${index * 0.05}s`;
+    div.onclick = () => openLightbox(fullPath, false);
+
+    const img = document.createElement('img');
+    img.alt = `${data.title} — ${fileName}`;
+    img.loading = 'lazy';
+    img.dataset.fullSrc = fullPath;
+    img.src = PLACEHOLDER_IMG;
+    div.appendChild(img);
+    galleryContainer.appendChild(div);
+
+    createPreviewSrc(fullPath).then((previewSrc) => {
+      if (img.isConnected) img.src = previewSrc;
+    });
+  });
+}
+
+function renderWorkspace() {
+  const data = flowData[activeFlow];
+
+  if (isInitialRender) {
+    isInitialRender = false;
+    previewTitle.innerText = data.title;
+    buildGalleryContent(data);
+    requestAnimationFrame(updateSubTabIndicator);
+    return;
+  }
+
+  isRendering = true;
+  previewTitle.classList.add('is-fading');
+  galleryContainer.classList.add('is-switching');
+
+  setTimeout(() => {
+    previewTitle.innerText = data.title;
+    previewTitle.classList.remove('is-fading');
+    buildGalleryContent(data);
+    galleryContainer.classList.remove('is-switching');
+    isRendering = false;
+    requestAnimationFrame(updateSubTabIndicator);
+  }, 180);
+}
+
+// Lightbox Zoom/Pan
+let scale = 1, translateX = 0, translateY = 0, isDragging = false, startX, startY;
+
+function openLightbox(path, isSvg = false) {
+  lbImg.src = path;
+  lbImg.classList.toggle('is-svg-preview', isSvg);
+  lb.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  scale = 1; translateX = 0; translateY = 0;
+  updateTransform();
+}
+
+function closeLightbox() {
+  if (!lb.classList.contains('active')) return;
+  lb.classList.remove('active');
+  lbImg.classList.remove('is-svg-preview');
+  document.body.style.overflow = '';
+}
+
+function updateTransform() {
+  lbImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
+
+lb.addEventListener('click', (e) => { if (e.target === lb) closeLightbox(); });
+
+lb.addEventListener('wheel', (e) => {
+  if (!lb.classList.contains('active')) return;
+  e.preventDefault();
+  scale = Math.min(Math.max(1, scale + (e.deltaY > 0 ? -0.2 : 0.2)), 8);
+  if (scale === 1) { translateX = 0; translateY = 0; }
+  updateTransform();
+}, { passive: false });
+
+lbImg.addEventListener('mousedown', (e) => {
+  if (scale > 1) { isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; lbImg.style.cursor = 'grabbing'; }
+});
+window.addEventListener('mousemove', (e) => {
+  if (isDragging) { translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform(); }
+});
+window.addEventListener('mouseup', () => { isDragging = false; lbImg.style.cursor = 'grab'; });
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+window.addEventListener('resize', updateSubTabIndicator);
+
+renderWorkspace();
+requestAnimationFrame(updateSubTabIndicator);
+</script>
+</body>
+</html>

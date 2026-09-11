@@ -1,0 +1,13 @@
+{
+  "name": "patterflow-layouts",
+  "compatibility_date": "2026-09-11",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./layout",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "layouts.patternflow.fit", "custom_domain": true }
+  ]
+}

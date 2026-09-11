@@ -1,0 +1,15 @@
+# Netlify free hosting — drag this SETUP-LAYOUT folder or connect via Git
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Content-Type = "image/svg+xml"
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
