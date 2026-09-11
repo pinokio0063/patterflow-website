@@ -42,7 +42,7 @@ The website cannot run `.exe` on Cloudflare. The owner PC stays on 24h and serve
 | https://nest-api.patternflow.fit | `127.0.0.1:9785` Custom `nest.exe` |
 | https://nesting-api.patternflow.fit | `127.0.0.1:9786` Sparrow `temp.exe` |
 
-APIs are JSON-only (`POST /simulate`, `GET /health`). They do not serve the exe files.
+APIs are JSON-only (`POST /simulate`, `GET /health`, `GET /queue`). They do not serve the exe files. Both engines run one job at a time (max 4 in line). Extra users wait; the 5th request is rejected. `GET /queue` reports running/waiting so the UI can show the server line.
 
 Tunnel config (local, not in git): `nest/pc-server/config.yml` from `config.example.yml`.
 

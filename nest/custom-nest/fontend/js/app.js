@@ -219,7 +219,7 @@
     }
 
     function defaultJobRows() {
-        var starter = { M: 2, L: 2, XL: 2 };
+        var starter = { M: 3, L: 3, XL: 3 };
         return CN.chart.sizeKeys().map(function (size) {
             return { NAME: '', NUMBER: '', SIZE: size, QTY: starter[size] || 0, SLV: 'HAF', COMMENTS: '' };
         });
@@ -230,6 +230,37 @@
         return isNaN(n) || n < 0 ? 0 : n;
     }
 
+    var MAX_PCS_SIZE = 10;
+    var MAX_PCS_TOTAL = 40;
+
+    var limitTimer = null;
+
+    function flashLimitNotice() {
+        var el = $('limitToast');
+        if (!el) return;
+        el.classList.add('on');
+        clearTimeout(limitTimer);
+        limitTimer = setTimeout(function () {
+            el.classList.remove('on');
+        }, 3600);
+    }
+
+    function clampQty(raw, row, announce) {
+        var wanted = parseInt(raw, 10);
+        if (isNaN(wanted) || wanted < 0) wanted = 0;
+        var n = wanted;
+        if (n > MAX_PCS_SIZE) n = MAX_PCS_SIZE;
+        var others = 0;
+        jobRows.forEach(function (r) {
+            if (r !== row) others += rowQty(r);
+        });
+        var room = MAX_PCS_TOTAL - others;
+        if (room < 0) room = 0;
+        if (n > room) n = room;
+        if (announce && wanted > n) flashLimitNotice();
+        return n;
+    }
+
     function renderJob() {
         var tb = $('jobBody');
         tb.innerHTML = '';
@@ -238,20 +269,25 @@
             tr.className = 'job-row';
             tr.innerHTML =
                 '<span class="size-cell">' + escapeAttr(row.SIZE) + '</span>' +
-                '<input data-k="QTY" type="number" min="0" step="1" value="' + rowQty(row) + '" />' +
+                '<input data-k="QTY" type="number" min="0" max="' + MAX_PCS_SIZE + '" step="1" value="' + rowQty(row) + '" />' +
                 '<select data-k="SLV">' +
                     '<option value="HAF"' + (row.SLV === 'HAF' ? ' selected' : '') + '>HAF</option>' +
                     '<option value="FULL"' + (row.SLV === 'FULL' ? ' selected' : '') + '>FULL</option>' +
                 '</select>';
             Array.prototype.forEach.call(tr.querySelectorAll('input,select'), function (el) {
                 el.addEventListener('change', function () {
-                    row[el.getAttribute('data-k')] = el.value;
-                    if (el.getAttribute('data-k') === 'QTY') row.QTY = rowQty(row);
+                    if (el.getAttribute('data-k') === 'QTY') {
+                        row.QTY = clampQty(el.value, row, true);
+                        el.value = row.QTY;
+                    } else {
+                        row[el.getAttribute('data-k')] = el.value;
+                    }
                     renderChips();
                 });
                 el.addEventListener('input', function () {
                     if (el.getAttribute('data-k') !== 'QTY') return;
-                    row.QTY = rowQty({ QTY: el.value });
+                    row.QTY = clampQty(el.value, row, true);
+                    if (String(el.value) !== '' && Number(el.value) !== row.QTY) el.value = row.QTY;
                     renderChips();
                 });
             });
@@ -294,6 +330,9 @@
             }
             return row;
         });
+        jobRows.forEach(function (row) {
+            row.QTY = clampQty(row.QTY, row);
+        });
         if (!jobRows.length) jobRows.push(emptyRow());
         renderJob();
     }
@@ -301,7 +340,8 @@
     function collectJob() {
         var out = [];
         jobRows.forEach(function (r) {
-            var q = rowQty(r);
+            var q = clampQty(rowQty(r), r);
+            r.QTY = q;
             var i;
             for (i = 0; i < q; i++) {
                 out.push({
@@ -340,10 +380,40 @@
 
     function setCountdown(sec) {
         var text = (Math.max(0, Number(sec) || 0)).toFixed(1);
-        var a = $('emptyNesting');
-        var b = $('emptyCustom');
-        if (a) a.textContent = text;
-        if (b) b.textContent = text;
+        var nodes = document.querySelectorAll('.pane-empty .cd');
+        Array.prototype.forEach.call(nodes, function (el) { el.textContent = text; });
+    }
+
+    function setQueueMsg(text) {
+        var a = $('qmNesting');
+        var b = $('qmCustom');
+        if (a) a.textContent = text || '';
+        if (b) b.textContent = text || '';
+    }
+
+    function readQueue(url) {
+        if (!url) return Promise.resolve(null);
+        return fetch(url, { cache: 'no-store' }).then(function (res) { return res.json(); }).catch(function () { return null; });
+    }
+
+    function pollQueues() {
+        return Promise.all([
+            readQueue(window.PF_NEST_API ? apiUrl('/queue') : ''),
+            readQueue(window.PF_NESTING_API ? nestingApiUrl('/queue') : '')
+        ]).then(function (pair) {
+            var custom = pair[0] || {};
+            var sparrow = pair[1] || {};
+            var wait = Math.max(Number(custom.waiting) || 0, Number(sparrow.waiting) || 0);
+            var run = (Number(custom.running) || 0) || (Number(sparrow.running) || 0);
+            var msg = sparrow.message || custom.message || '';
+            if (wait > 0) {
+                msg = 'Server: waiting in line · ' + wait + ' ahead';
+            } else if (run > 0) {
+                msg = 'Server: your job is running';
+            }
+            setQueueMsg(msg);
+            return msg;
+        });
     }
 
     function showEmptyFrames(on) {
@@ -410,12 +480,15 @@
         resetZoom100();
         showEmptyFrames(true);
         setCountdown(limit);
+        setQueueMsg('Server: joining queue…');
         setSimTime('calculating… ' + limit.toFixed(1) + ' s');
+        pollQueues();
         var tick = setInterval(function () {
             var left = Math.max(0, limit - (Date.now() - t0) / 1000);
             setCountdown(left);
             setSimTime('calculating… ' + left.toFixed(1) + ' s');
         }, 100);
+        var qTick = setInterval(pollQueues, 700);
         var payload = {
             dia: parseFloat($('inpDia').value),
             minGap: parseFloat($('inpGap').value),
@@ -439,6 +512,8 @@
             postJson(nestingUrl, payload).catch(function (e) { return { ok: false, error: e.message || String(e) }; })
         ]).then(function (pair) {
             clearInterval(tick);
+            clearInterval(qTick);
+            setQueueMsg('');
             var custom = pair[0];
             var nesting = pair[1];
             if (custom && !custom.pending) {
@@ -459,6 +534,7 @@
             }
         }).then(function () {
             clearInterval(tick);
+            clearInterval(qTick);
             btn.disabled = false;
             btn.textContent = 'START';
         });

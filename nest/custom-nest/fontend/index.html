@@ -65,7 +65,7 @@
             </div>
             <div class="canvas-wrap" id="viewportNesting">
                 <div id="stageNesting"></div>
-                <div class="pane-empty" id="emptyNesting">20.0</div>
+                <div class="pane-empty" id="emptyNesting"><span class="cd">20.0</span><span class="qm" id="qmNesting"></span></div>
             </div>
         </section>
 
@@ -84,7 +84,7 @@
             </div>
             <div class="canvas-wrap" id="viewport">
                 <div id="stageWorld"></div>
-                <div class="pane-empty" id="emptyCustom">20.0</div>
+                <div class="pane-empty" id="emptyCustom"><span class="cd">20.0</span><span class="qm" id="qmCustom"></span></div>
             </div>
         </section>
     </main>
@@ -96,7 +96,14 @@
         </div>
         <div class="pattern-list" id="patternList"></div>
         <div class="pattern-status" id="patternStatus">No pattern selected</div>
+        <p class="pattern-premium">Premium: custom patterns can be added</p>
     </aside>
+</div>
+<div class="limit-toast" id="limitToast" role="status" aria-live="polite">
+    <div class="limit-toast-kicker">Notice</div>
+    <div class="limit-toast-title">Test limit</div>
+    <p>Max <b>10</b> pcs per size. Over 10 becomes 10. Total max <b>40</b>.</p>
+    <p>Need more? <b>Premium</b></p>
 </div>
 
 <script src="js/config.js"></script>

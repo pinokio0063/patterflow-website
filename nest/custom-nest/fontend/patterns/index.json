@@ -3,8 +3,8 @@
         "id":  "polo",
         "name":  "polo",
         "back":  "patterns/polo/BACK-01.svg",
-        "sleeveLong":  "patterns/polo/LONG-SLV-rib01.svg",
-        "sleeve":  "patterns/polo/SHROT-SLVrib-01.svg",
+        "sleeveLong":  "patterns/polo/LONG-SLV.svg",
+        "sleeve":  "patterns/polo/SHROT-SLV.svg",
         "font":  "patterns/polo/FRONT-01.svg"
     },
     {

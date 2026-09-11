@@ -27,8 +27,57 @@ IN_TO_M = 0.0254
 # Browser/Cloudflare wait ~100s; keep engine under that.
 MAX_TIME_SEC = 90
 IO_OVERHEAD_SEC = 4
+MAX_LINE = 4
 # temp.exe uses one shared runtime folder — one job at a time.
-JOB_LOCK = threading.Lock()
+
+
+class JobQueue(object):
+    def __init__(self):
+        self._job = threading.Lock()
+        self._st = threading.Lock()
+        self.waiting = 0
+        self.running = 0
+
+    def snapshot(self):
+        with self._st:
+            wait = self.waiting
+            run = self.running
+        if run and wait:
+            msg = "Server: 1 running, %s waiting. Your turn is next in line." % wait
+        elif run:
+            msg = "Server: job is running."
+        elif wait:
+            msg = "Server: %s waiting." % wait
+        else:
+            msg = "Server: ready."
+        return {
+            "ok": True,
+            "running": run,
+            "waiting": wait,
+            "position": run + wait,
+            "max": MAX_LINE,
+            "message": msg,
+        }
+
+    def acquire(self):
+        with self._st:
+            if self.running + self.waiting >= MAX_LINE:
+                return False
+            self.waiting += 1
+        self._job.acquire()
+        with self._st:
+            self.waiting = max(0, self.waiting - 1)
+            self.running += 1
+        return True
+
+    def release(self):
+        with self._st:
+            self.running = max(0, self.running - 1)
+        if self._job.locked():
+            self._job.release()
+
+
+QUEUE = JobQueue()
 
 
 def normalize_size(raw):
@@ -259,15 +308,21 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/queue":
+            snap = QUEUE.snapshot()
+            snap["engine"] = "sparrow"
+            self._json(200, snap)
+            return
         if path in ("/", "/health", "/engine", "/simulate"):
-            self._json(200, {
-                "ok": True,
+            snap = QUEUE.snapshot()
+            snap.update({
                 "engine": "sparrow",
                 "exe": os.path.isfile(ENGINE),
                 "hint": "POST /simulate with job JSON",
             })
+            self._json(200, snap)
             return
-        self._json(404, fail_payload("GET /health or POST /simulate only"))
+        self._json(404, fail_payload("GET /health, /queue or POST /simulate only"))
 
     def do_POST(self):
         if self.path.split("?", 1)[0] != "/simulate":
@@ -301,28 +356,30 @@ class Handler(BaseHTTPRequestHandler):
             time_sec = MAX_TIME_SEC
         cli_time = max(3, time_sec - IO_OVERHEAD_SEC)
         http_limit = time_sec + 20
+        if not QUEUE.acquire():
+            self._json(429, fail_payload("Queue full (%s). Wait and try again." % MAX_LINE))
+            return
         try:
-            with JOB_LOCK:
-                os.makedirs(OUTPUT_DIR, exist_ok=True)
-                with open(INPUT_PATH, "w", encoding="utf-8") as fh:
-                    json.dump(sparrow, fh)
-                for path in (OUTPUT_SVG, OUTPUT_JSON):
-                    if os.path.isfile(path):
-                        os.remove(path)
-                proc = subprocess.run(
-                    [ENGINE, "-i", INPUT_PATH, "-t", str(cli_time), "-x"],
-                    cwd=RUNTIME,
-                    capture_output=True,
-                    timeout=http_limit,
-                )
-                if not os.path.isfile(OUTPUT_SVG):
-                    elapsed = int((time.time() - t0) * 1000)
-                    err = (proc.stderr or proc.stdout or b"").decode("utf-8", "replace").strip()
-                    hint = err.splitlines()[-1] if err else ("exit %s" % proc.returncode)
-                    self._json(500, fail_payload("temp.exe produced no SVG (%s)" % hint, elapsed))
-                    return
-                with open(OUTPUT_SVG, "r", encoding="utf-8") as fh:
-                    svg_raw = fh.read()
+            os.makedirs(OUTPUT_DIR, exist_ok=True)
+            with open(INPUT_PATH, "w", encoding="utf-8") as fh:
+                json.dump(sparrow, fh)
+            for path in (OUTPUT_SVG, OUTPUT_JSON):
+                if os.path.isfile(path):
+                    os.remove(path)
+            proc = subprocess.run(
+                [ENGINE, "-i", INPUT_PATH, "-t", str(cli_time), "-x"],
+                cwd=RUNTIME,
+                capture_output=True,
+                timeout=http_limit,
+            )
+            if not os.path.isfile(OUTPUT_SVG):
+                elapsed = int((time.time() - t0) * 1000)
+                err = (proc.stderr or proc.stdout or b"").decode("utf-8", "replace").strip()
+                hint = err.splitlines()[-1] if err else ("exit %s" % proc.returncode)
+                self._json(500, fail_payload("temp.exe produced no SVG (%s)" % hint, elapsed))
+                return
+            with open(OUTPUT_SVG, "r", encoding="utf-8") as fh:
+                svg_raw = fh.read()
         except subprocess.TimeoutExpired:
             elapsed = int((time.time() - t0) * 1000)
             self._json(504, fail_payload("Sparrow nest timed out (%ss)." % time_sec, elapsed))
@@ -330,6 +387,8 @@ class Handler(BaseHTTPRequestHandler):
         except OSError as e:
             self._json(500, fail_payload("Could not start temp.exe: %s" % e))
             return
+        finally:
+            QUEUE.release()
         elapsed = int((time.time() - t0) * 1000)
         meters = fabric_meters(svg_raw)
         self._json(200, {

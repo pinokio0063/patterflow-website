@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -12,6 +13,58 @@ PORT = int(os.environ.get("PF_NEST_PORT", "9785"))
 HOST = os.environ.get("PF_NEST_HOST", "127.0.0.1")
 # Cloudflare edge ~100s; stay under that on the public tunnel.
 NEST_OFF_TIMEOUT_S = 90
+MAX_LINE = 4
+
+
+class JobQueue(object):
+    """One nest.exe at a time. Extra users wait; 5th is rejected."""
+
+    def __init__(self):
+        self._job = threading.Lock()
+        self._st = threading.Lock()
+        self.waiting = 0
+        self.running = 0
+
+    def snapshot(self):
+        with self._st:
+            wait = self.waiting
+            run = self.running
+        if run and wait:
+            msg = "Server: 1 running, %s waiting. Your turn is next in line." % wait
+        elif run:
+            msg = "Server: job is running."
+        elif wait:
+            msg = "Server: %s waiting." % wait
+        else:
+            msg = "Server: ready."
+        return {
+            "ok": True,
+            "running": run,
+            "waiting": wait,
+            "position": run + wait,
+            "max": MAX_LINE,
+            "message": msg,
+        }
+
+    def acquire(self):
+        with self._st:
+            if self.running + self.waiting >= MAX_LINE:
+                return False
+            self.waiting += 1
+        self._job.acquire()
+        with self._st:
+            self.waiting = max(0, self.waiting - 1)
+            self.running += 1
+        return True
+
+    def release(self):
+        with self._st:
+            self.running = max(0, self.running - 1)
+        if self._job.locked():
+            self._job.release()
+
+
+QUEUE = JobQueue()
 
 
 def nest_timeout_sec(body):
@@ -24,6 +77,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/queue":
+            self._json(200, json.dumps(QUEUE.snapshot()).encode("utf-8"))
+            return
         if path in ("/", "/engine", "/health", "/simulate"):
             status = {
                 "ok": True,
@@ -31,10 +87,11 @@ class Handler(BaseHTTPRequestHandler):
                 "exe": os.path.isfile(ENGINE),
                 "hint": "POST /simulate with job JSON"
             }
+            status.update(QUEUE.snapshot())
             self._json(200, json.dumps(status).encode("utf-8"))
             return
         self._json(404, json.dumps({
-            "ok": False, "error": "GET /health or POST /simulate only",
+            "ok": False, "error": "GET /health, /queue or POST /simulate only",
             "pages": [], "job": {"rows": []}, "elapsedMs": 0
         }).encode("utf-8"))
 
@@ -57,32 +114,44 @@ class Handler(BaseHTTPRequestHandler):
             }).encode("utf-8")
             self._json(503, payload)
             return
-        limit = nest_timeout_sec(body)
-        try:
-            proc = subprocess.run(
-                [ENGINE],
-                input=body,
-                capture_output=True,
-                timeout=limit,
-                cwd=os.path.join(ROOT, "engine"),
-            )
-        except subprocess.TimeoutExpired:
-            sec = int(limit or NEST_OFF_TIMEOUT_S)
-            self._json(504, json.dumps({
-                "ok": False, "error": "C++ nest timed out (%ss)." % sec,
-                "pages": [], "job": {"rows": []}, "elapsedMs": sec * 1000
-            }).encode("utf-8"))
-            return
-        out = proc.stdout if proc.stdout else proc.stderr
-        if not out:
-            out = json.dumps({
+        if not QUEUE.acquire():
+            self._json(429, json.dumps({
                 "ok": False,
-                "error": "nest.exe returned no JSON (exit %s)" % proc.returncode,
+                "error": "Queue full (%s). Wait and try again." % MAX_LINE,
                 "pages": [],
                 "job": {"rows": []},
                 "elapsedMs": 0
-            }).encode("utf-8")
-        self._json(200 if proc.returncode in (0, 2) else 500, out)
+            }).encode("utf-8"))
+            return
+        limit = nest_timeout_sec(body)
+        try:
+            try:
+                proc = subprocess.run(
+                    [ENGINE],
+                    input=body,
+                    capture_output=True,
+                    timeout=limit,
+                    cwd=os.path.join(ROOT, "engine"),
+                )
+            except subprocess.TimeoutExpired:
+                sec = int(limit or NEST_OFF_TIMEOUT_S)
+                self._json(504, json.dumps({
+                    "ok": False, "error": "C++ nest timed out (%ss)." % sec,
+                    "pages": [], "job": {"rows": []}, "elapsedMs": sec * 1000
+                }).encode("utf-8"))
+                return
+            out = proc.stdout if proc.stdout else proc.stderr
+            if not out:
+                out = json.dumps({
+                    "ok": False,
+                    "error": "nest.exe returned no JSON (exit %s)" % proc.returncode,
+                    "pages": [],
+                    "job": {"rows": []},
+                    "elapsedMs": 0
+                }).encode("utf-8")
+            self._json(200 if proc.returncode in (0, 2) else 500, out)
+        finally:
+            QUEUE.release()
 
     def do_OPTIONS(self):
         self.send_response(204)
