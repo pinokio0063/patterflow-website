@@ -1,39 +1,30 @@
 #!/usr/bin/env python3
-"""Serve the preview UI and run nest.exe for /simulate (C++ engine)."""
+"""JSON API for nest.exe (C++ engine). No static files — tunnel must not leak the exe."""
 import json
 import os
 import subprocess
 import sys
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ENGINE = os.path.join(ROOT, "engine", "nest.exe")
 PORT = int(os.environ.get("PF_NEST_PORT", "8765"))
-HOST = os.environ.get("PF_NEST_HOST", "0.0.0.0")
-# Record trials ON = no limit (DEV snaps are slow). Record OFF = 180s.
-NEST_OFF_TIMEOUT_S = 180
+HOST = os.environ.get("PF_NEST_HOST", "127.0.0.1")
+# Cloudflare edge ~100s; stay under that on the public tunnel.
+NEST_OFF_TIMEOUT_S = 90
 
 
 def nest_timeout_sec(body):
-    try:
-        req = json.loads(body.decode("utf-8"))
-        if req.get("devTrials"):
-            return None
-    except (ValueError, TypeError, UnicodeDecodeError):
-        pass
     return NEST_OFF_TIMEOUT_S
 
 
-class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=ROOT, **kwargs)
-
+class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         sys.stderr.write("[%s] %s\n" % (self.log_date_time_string(), fmt % args))
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
-        if path in ("/engine", "/health", "/simulate"):
+        if path in ("/", "/engine", "/health", "/simulate"):
             status = {
                 "ok": True,
                 "engine": "cpp",
@@ -42,7 +33,10 @@ class Handler(SimpleHTTPRequestHandler):
             }
             self._json(200, json.dumps(status).encode("utf-8"))
             return
-        return SimpleHTTPRequestHandler.do_GET(self)
+        self._json(404, json.dumps({
+            "ok": False, "error": "GET /health or POST /simulate only",
+            "pages": [], "job": {"rows": []}, "elapsedMs": 0
+        }).encode("utf-8"))
 
     def do_POST(self):
         if self.path.split("?", 1)[0] != "/simulate":
@@ -108,11 +102,6 @@ class Handler(SimpleHTTPRequestHandler):
         self._cors()
         self.end_headers()
         self.wfile.write(payload)
-
-    def end_headers(self):
-        self.send_header("Cache-Control", "no-store")
-        super().end_headers()
-
 
 def main():
     os.chdir(ROOT)

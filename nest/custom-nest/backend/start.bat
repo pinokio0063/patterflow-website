@@ -18,10 +18,9 @@ for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":8765" ^| findstr "LISTENING
   taskkill /F /PID %%P >nul 2>&1
 )
 
-echo PatternFlow Custom Nest Preview  (C++ engine)
-echo Open: http://127.0.0.1:8765/
+echo PatternFlow Custom Nest API  (C++ engine)
+echo Listen: http://127.0.0.1:8765/
 echo Close THIS window to stop the server.
-start "" "http://127.0.0.1:8765/"
 
 where py >nul 2>&1
 if %errorlevel%==0 (

@@ -11,3 +11,5 @@ Priceing website/
 *.zip
 node_modules/
 .wrangler/
+nest/pc-server/config.yml
+nest/nesting/backend/runtime/
