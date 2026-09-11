@@ -9,3 +9,4 @@ Desktop.ini
 usermap page/
 *.zip
 node_modules/
+.wrangler/
