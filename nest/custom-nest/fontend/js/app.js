@@ -5,12 +5,21 @@
     var masters = { font: null, back: null, sleeve: null, sleeveLong: null };
     var jobRows = [];
     var lastResult = null;
+    var lastNesting = null;
     var lastSvg = '';
+    var lastNestSvg = '';
     var pageFilter = 0;
     var zoom = 1;
     var panX = 20;
     var panY = 20;
     var fitZoom = 1;
+    var nestZoom = 1;
+    var nestPanX = 20;
+    var nestPanY = 20;
+    var nestFitZoom = 1;
+    var nestDragging = false;
+    var nestDragX = 0;
+    var nestDragY = 0;
     var dragging = false;
     var dragX = 0;
     var dragY = 0;
@@ -23,6 +32,16 @@
     function apiUrl(path) {
         var base = String(window.PF_NEST_API || "").replace(/\/$/, "");
         return base + path;
+    }
+
+    function nestingApiUrl(path) {
+        var base = String(window.PF_NESTING_API || "").replace(/\/$/, "");
+        return base + path;
+    }
+
+    function fmtMeters(m) {
+        if (m == null || !isFinite(m)) return '—';
+        return Number(m).toFixed(3) + ' m';
     }
 
     function fillSleeveSelect() {
@@ -221,6 +240,22 @@
         if (el) el.textContent = text;
     }
 
+    function postJson(url, payload) {
+        if (!url || url.charAt(0) === '/') {
+            return Promise.resolve({ pending: true });
+        }
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function (res) { return res.text().then(function (text) { return { res: res, text: text }; }); })
+        .then(function (pack) {
+            var text = pack.text || '';
+            if (!text || text.charAt(0) === '<') throw new Error('WRONG_SERVER');
+            return JSON.parse(text);
+        });
+    }
+
     function simulate() {
         var btn = $('btnSim');
         if (!masters.font || !masters.back) {
@@ -239,6 +274,7 @@
             minGap: parseFloat($('inpGap').value),
             rowsPerDoc: parseInt($('inpRows').value, 10) || 4,
             sleeveKey: $('sleeveKey').value === 'without_rib' ? 'short_slv_without_rib' : 'short_slv_with_rib',
+            timeSec: window.PF_NESTING_TIME_SEC || 30,
             devTrials: false,
             job: collectJob(),
             chart: window.PF_CHART || {},
@@ -249,44 +285,33 @@
                 sleeveLong: outlinePayload(masters.sleeveLong)
             }
         };
-        fetch(apiUrl('/simulate'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(function (res) { return res.text().then(function (text) { return { res: res, text: text }; }); })
-        .then(function (pack) {
-            var text = pack.text || '';
-            if (!text || text.charAt(0) === '<') {
-                throw new Error('WRONG_SERVER');
-            }
-            var result;
-            try { result = JSON.parse(text); }
-            catch (e) { throw new Error('WRONG_SERVER'); }
-            return result;
-        }).then(function (result) {
+        var customUrl = window.PF_NEST_API ? apiUrl('/simulate') : '';
+        var nestingUrl = window.PF_NESTING_API ? nestingApiUrl('/simulate') : '';
+        Promise.all([
+            postJson(customUrl, payload).catch(function (e) { return { ok: false, error: e.message || String(e) }; }),
+            postJson(nestingUrl, payload).catch(function (e) { return { ok: false, error: e.message || String(e) }; })
+        ]).then(function (pair) {
             clearInterval(tick);
-            lastResult = result;
-            if (window.CustomNest) window.CustomNest._lastResult = result;
-            pageFilter = 0;
-            renderTabs();
+            var custom = pair[0];
+            var nesting = pair[1];
+            if (custom && !custom.pending) {
+                lastResult = custom;
+                if (window.CustomNest) window.CustomNest._lastResult = custom;
+                pageFilter = 0;
+                renderTabs();
+                paint(true);
+            }
+            lastNesting = nesting;
+            paintNesting(true);
             renderStats();
-            paint(true);
-            var sec = (result.elapsedMs || (Date.now() - t0)) / 1000;
-            setSimTime((result.engine === 'cpp' ? 'C++  ' : '') + sec.toFixed(2) + ' s');
-            if (!result.ok && result.error) alert(result.error);
-        }).catch(function (err) {
-            clearInterval(tick);
-            setSimTime('server error');
-            var msg = (err && err.message) ? err.message : String(err);
-            if (msg === 'WRONG_SERVER' || msg.indexOf('JSON') >= 0 || msg.indexOf('Failed to fetch') >= 0) {
-                msg = window.PF_NEST_API
-                    ? ('Nest backend is not reachable:\n' + window.PF_NEST_API)
-                    : 'Nest backend is not connected yet.\n\n'
-                        + 'This page is live on nest.patternflow.fit.\n'
-                        + 'For local engine: run nest\\custom-nest\\backend\\start.bat\n'
-                        + 'then set js/config.js PF_NEST_API to that server URL.';
+            renderNestingStats();
+            renderCompare();
+            var sec = (Date.now() - t0) / 1000;
+            if ((!custom || custom.pending) && (!nesting || nesting.pending)) {
+                setSimTime('preview only · backends not connected');
+            } else {
+                setSimTime(sec.toFixed(2) + ' s');
             }
-            alert(msg);
         }).then(function () {
             clearInterval(tick);
             btn.disabled = false;
@@ -318,8 +343,9 @@
     }
 
     function renderStats() {
-        if (!lastResult) { $('stats').textContent = 'No simulation yet'; return; }
-        if (!lastResult.ok) { $('stats').textContent = lastResult.error; return; }
+        if (!lastResult) { $('stats').textContent = 'Waiting for backend'; return; }
+        if (lastResult.pending) { $('stats').textContent = 'Backend not connected'; return; }
+        if (!lastResult.ok) { $('stats').textContent = lastResult.error || 'Custom failed'; return; }
         var r = lastResult;
         var extra = '';
         if (r.overlapCount) {
@@ -328,11 +354,32 @@
         var sec = (r.elapsedMs || 0) / 1000;
         var timeLabel = sec < 10 ? sec.toFixed(2) + ' s' : sec.toFixed(1) + ' s';
         $('stats').innerHTML =
-            '<b>' + r.pages.length + '</b> docs · <b>' + r.bodyRowCount + '</b> body rows · ' +
-            r.job.rows.length + ' copies · fabric <b>' + r.fabricMeters.toFixed(3) + ' m</b>' +
-            ' · calc <b class="calc-time">' + timeLabel + '</b>' +
-            extra +
-            (r.warnings.length ? ' · ' + r.warnings.join(' · ') : '');
+            'fabric <b>' + fmtMeters(r.fabricMeters) + '</b> · <b>' + (r.pages ? r.pages.length : 0) + '</b> docs · ' +
+            'calc <b class="calc-time">' + timeLabel + '</b>' + extra;
+    }
+
+    function renderNestingStats() {
+        var el = $('statsNesting');
+        if (!el) return;
+        if (!lastNesting) { el.textContent = 'Waiting for backend'; return; }
+        if (lastNesting.pending) { el.textContent = 'Backend not connected'; return; }
+        if (!lastNesting.ok) { el.textContent = lastNesting.error || 'Nesting failed'; return; }
+        el.innerHTML = 'fabric <b>' + fmtMeters(lastNesting.fabricMeters) + '</b>';
+    }
+
+    function renderCompare() {
+        var el = $('compareStrip');
+        if (!el) return;
+        var n = lastNesting && lastNesting.ok ? lastNesting.fabricMeters : null;
+        var c = lastResult && lastResult.ok ? lastResult.fabricMeters : null;
+        var html = 'Fabric height · Nesting <b>' + fmtMeters(n) + '</b> · Custom <b>' + fmtMeters(c) + '</b>';
+        if (n != null && c != null && isFinite(n) && isFinite(c)) {
+            var d = n - c;
+            if (Math.abs(d) < 0.0005) html += ' · <span class="better">same</span>';
+            else if (d > 0) html += ' · <span class="better">Custom shorter by ' + Math.abs(d).toFixed(3) + ' m</span>';
+            else html += ' · <span class="better">Nesting shorter by ' + Math.abs(d).toFixed(3) + ' m</span>';
+        }
+        el.innerHTML = html;
     }
 
     function applyTransform() {
@@ -403,6 +450,73 @@
         zoom = next;
         applyTransform();
         updateZoomButtons();
+    }
+
+    function applyNestTransform() {
+        var world = $('stageNesting');
+        if (!world) return;
+        world.style.transform = 'translate(' + nestPanX + 'px,' + nestPanY + 'px) scale(' + nestZoom + ')';
+        if ($('nestZoomPct')) $('nestZoomPct').textContent = Math.round(nestZoom * 100) + '%';
+        if ($('btnNestZoomOut')) $('btnNestZoomOut').disabled = nestZoom <= (nestFitZoom || 0.05) + 0.0001;
+    }
+
+    function paintNesting(resetFit) {
+        var empty = $('emptyNesting');
+        var world = $('stageNesting');
+        if (!world) return;
+        var svg = '';
+        if (lastNesting && lastNesting.ok && lastNesting.svg) svg = lastNesting.svg;
+        lastNestSvg = svg;
+        world.innerHTML = svg;
+        if (empty) empty.style.display = svg ? 'none' : 'flex';
+        var node = world.querySelector('svg');
+        if (node) {
+            var vb = (node.getAttribute('viewBox') || '0 0 63 20').split(/\s+/);
+            var worldW = parseFloat(vb[2]) || 63;
+            node.removeAttribute('width');
+            node.removeAttribute('height');
+            node.style.width = (worldW * 12) + 'px';
+            node.style.height = 'auto';
+        }
+        if (resetFit) nestZoomFit();
+        else applyNestTransform();
+    }
+
+    function nestZoomFit() {
+        var vp = $('viewportNesting');
+        var svg = $('stageNesting') && $('stageNesting').querySelector('svg');
+        if (!vp || !svg) {
+            nestZoom = 1; nestPanX = 20; nestPanY = 20; applyNestTransform();
+            return;
+        }
+        var w = svg.getBoundingClientRect().width / (nestZoom || 1);
+        var h = svg.getBoundingClientRect().height / (nestZoom || 1);
+        if (w < 1) w = 800;
+        if (h < 1) h = 400;
+        var box = vp.getBoundingClientRect();
+        nestFitZoom = Math.min((box.width - 48) / w, (box.height - 48) / h);
+        if (!isFinite(nestFitZoom) || nestFitZoom <= 0) nestFitZoom = 0.2;
+        nestZoom = nestFitZoom;
+        nestPanX = 24;
+        nestPanY = 24;
+        applyNestTransform();
+    }
+
+    function nestZoomBy(factor, cx, cy) {
+        var next = nestZoom * factor;
+        var floor = nestFitZoom > 0 ? nestFitZoom : 0.05;
+        if (next < floor) next = floor;
+        if (next > 16) next = 16;
+        if (next === nestZoom) {
+            applyNestTransform();
+            return;
+        }
+        if (cx != null) {
+            nestPanX = cx - (cx - nestPanX) * (next / nestZoom);
+            nestPanY = cy - (cy - nestPanY) * (next / nestZoom);
+        }
+        nestZoom = next;
+        applyNestTransform();
     }
 
     function downloadJson() {
@@ -477,6 +591,9 @@
         $('btnZoomFit').addEventListener('click', zoomFit);
         $('btnDownloadSvg').addEventListener('click', downloadSvg);
         $('btnDownloadJson').addEventListener('click', downloadJson);
+        if ($('btnNestZoomIn')) $('btnNestZoomIn').addEventListener('click', function () { nestZoomBy(1.25); });
+        if ($('btnNestZoomOut')) $('btnNestZoomOut').addEventListener('click', function () { nestZoomBy(1 / 1.25); });
+        if ($('btnNestZoomFit')) $('btnNestZoomFit').addEventListener('click', nestZoomFit);
 
         var vp = $('viewport');
         vp.addEventListener('wheel', function (e) {
@@ -503,7 +620,35 @@
             dragging = false;
             vp.classList.remove('drag');
         });
-        window.addEventListener('resize', function () { if (lastSvg) zoomFit(); });
+        var nvp = $('viewportNesting');
+        if (nvp) {
+            nvp.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                var rect = nvp.getBoundingClientRect();
+                nestZoomBy(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - rect.left, e.clientY - rect.top);
+            }, { passive: false });
+            nvp.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) return;
+                nestDragging = true;
+                nvp.classList.add('drag');
+                nestDragX = e.clientX - nestPanX;
+                nestDragY = e.clientY - nestPanY;
+            });
+        }
+        window.addEventListener('mousemove', function (e) {
+            if (!nestDragging) return;
+            nestPanX = e.clientX - nestDragX;
+            nestPanY = e.clientY - nestDragY;
+            applyNestTransform();
+        });
+        window.addEventListener('mouseup', function () {
+            nestDragging = false;
+            if (nvp) nvp.classList.remove('drag');
+        });
+        window.addEventListener('resize', function () {
+            if (lastSvg) zoomFit();
+            if (lastNestSvg) nestZoomFit();
+        });
 
         jobRows = [
             { NAME: 'T1', NUMBER: '1', SIZE: 'L', SLV: 'HAF' },
@@ -518,6 +663,8 @@
         }
         renderJob();
         renderTabs();
+        renderCompare();
+        paintNesting(true);
         fetch(apiUrl('/engine')).then(function (r) { return r.text(); }).then(function (text) {
             if (!text || text.charAt(0) === '<') throw new Error('html');
             var info = JSON.parse(text);

@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PatternFlow · Custom Nest Preview</title>
+    <title>PatternFlow · Nest Compare</title>
     <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
 <div class="app">
     <aside class="side">
         <div class="brand">
-            <h1>CUSTOM NEST PREVIEW</h1>
-            <p>C++ nest engine · true-shape · 4 body rows / document</p>
+            <h1>NEST COMPARE</h1>
+            <p>Same input · Nesting (top) vs Custom (bottom) · fabric height</p>
         </div>
         <div class="scroll">
             <div class="block">
@@ -110,28 +110,50 @@
     </aside>
 
     <main class="stage">
-        <div class="stage-bar">
-            <div class="tabs" id="tabs"></div>
-            <div class="zoom-bar">
-                <button class="btn" id="btnZoomOut" type="button">−</button>
-                <span id="zoomPct">100%</span>
-                <button class="btn" id="btnZoomIn" type="button">+</button>
-                <button class="btn ghost" id="btnZoomFit" type="button">Fit</button>
-                <button class="btn" id="btnDownloadSvg" type="button">Download SVG</button>
-                <button class="btn" id="btnDownloadJson" type="button">Download JSON</button>
+        <div class="compare-strip" id="compareStrip">Fabric height · Nesting <b>—</b> · Custom <b>—</b></div>
+
+        <section class="pane" id="paneNesting">
+            <div class="stage-bar">
+                <div class="pane-title">NESTING · Sparrow · 30s</div>
+                <div class="zoom-bar">
+                    <button class="btn" id="btnNestZoomOut" type="button">−</button>
+                    <span id="nestZoomPct">100%</span>
+                    <button class="btn" id="btnNestZoomIn" type="button">+</button>
+                    <button class="btn ghost" id="btnNestZoomFit" type="button">Fit</button>
+                </div>
+                <div class="stats" id="statsNesting">Waiting for backend</div>
             </div>
-            <div class="stats" id="stats">No simulation yet</div>
-        </div>
-        <div class="canvas-wrap" id="viewport">
-            <div id="stageWorld"></div>
-            <div class="legend">
-                <span><i class="f"></i>FRONT</span>
-                <span><i class="b"></i>BACK</span>
-                <span><i class="s"></i>SLEEVE</span>
-                <span><i class="r"></i>OVERLAY</span>
+            <div class="canvas-wrap" id="viewportNesting">
+                <div id="stageNesting"></div>
+                <div class="pane-empty" id="emptyNesting">Nesting preview · same input · fabric height</div>
             </div>
-            <div class="hint">Wheel = zoom · Drag = pan · zoom out stops at Fit</div>
-        </div>
+        </section>
+
+        <section class="pane" id="paneCustom">
+            <div class="stage-bar">
+                <div class="pane-title">CUSTOM · nest.exe</div>
+                <div class="tabs" id="tabs"></div>
+                <div class="zoom-bar">
+                    <button class="btn" id="btnZoomOut" type="button">−</button>
+                    <span id="zoomPct">100%</span>
+                    <button class="btn" id="btnZoomIn" type="button">+</button>
+                    <button class="btn ghost" id="btnZoomFit" type="button">Fit</button>
+                    <button class="btn" id="btnDownloadSvg" type="button">Download SVG</button>
+                    <button class="btn" id="btnDownloadJson" type="button">Download JSON</button>
+                </div>
+                <div class="stats" id="stats">Waiting for backend</div>
+            </div>
+            <div class="canvas-wrap" id="viewport">
+                <div id="stageWorld"></div>
+                <div class="legend">
+                    <span><i class="f"></i>FRONT</span>
+                    <span><i class="b"></i>BACK</span>
+                    <span><i class="s"></i>SLEEVE</span>
+                    <span><i class="r"></i>OVERLAY</span>
+                </div>
+                <div class="hint">Wheel = zoom · Drag = pan · zoom out stops at Fit</div>
+            </div>
+        </section>
     </main>
 </div>
 

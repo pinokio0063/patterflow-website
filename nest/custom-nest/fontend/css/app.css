@@ -26,8 +26,9 @@ html, body {
 
 .app {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 320px 1fr;
     height: 100%;
+    overflow: hidden;
 }
 
 .side {
@@ -245,13 +246,52 @@ table.job input, table.job select {
     flex-direction: column;
     min-width: 0;
     min-height: 0;
+    height: 100%;
+    overflow: hidden;
     background: #111;
+}
+.compare-strip {
+    flex: 0 0 auto;
+    padding: 7px 12px;
+    font-size: 13px;
+    color: #ddd;
+    background: #161616;
+    border-bottom: 1px solid var(--line);
+}
+.compare-strip b { color: var(--font); }
+.compare-strip .better { color: #00c853; }
+.pane {
+    flex: 1 1 50%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+}
+.pane:last-child { border-bottom: none; }
+.pane-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #9ad0ff;
+    white-space: nowrap;
+}
+#paneCustom .pane-title { color: #f4a261; }
+.pane-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 13px;
+    pointer-events: none;
 }
 .stage-bar {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-bottom: 1px solid var(--line);
     background: var(--panel);
     flex-wrap: wrap;
@@ -327,11 +367,13 @@ table.job input, table.job select {
     cursor: grab;
 }
 .canvas-wrap.drag { cursor: grabbing; }
-#stageWorld {
+#stageWorld,
+#stageNesting {
     transform-origin: 0 0;
     width: max-content;
 }
-#stageWorld svg {
+#stageWorld svg,
+#stageNesting svg {
     display: block;
     background: #fff;
     box-shadow: 0 0 0 1px #333;
