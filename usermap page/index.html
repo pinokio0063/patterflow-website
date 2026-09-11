@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PatternFlow — Extension Usermap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+  <link rel="stylesheet" href="./css/cep-panel.css">
+</head>
+<body>
+  <div class="page-atmosphere" aria-hidden="true"></div>
+
+  <div class="lang-switch" id="langSwitch" role="group" aria-label="Language">
+    <button type="button" class="lang-switch__btn" data-lang="bn" id="langBn">বাংলা</button>
+    <button type="button" class="lang-switch__btn" data-lang="en" id="langEn">EN</button>
+  </div>
+
+  <div class="lang-modal" id="langModal" hidden>
+    <div class="lang-modal__card" role="dialog" aria-modal="true" aria-labelledby="langModalTitle">
+      <p class="lang-modal__eyebrow">PatternFlow AI</p>
+      <h2 class="lang-modal__title" id="langModalTitle">Choose your language</h2>
+      <div class="lang-modal__actions">
+        <button type="button" class="btn btn--primary lang-modal__pick" data-lang="bn">বাংলা</button>
+        <button type="button" class="btn btn--ghost lang-modal__pick" data-lang="en">English</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <a class="brand-mark" href="https://patterflow.netlify.app/" target="_blank" rel="noopener noreferrer">
+      <span class="brand-mark__name">PatternFlow</span>
+      <span class="brand-mark__tag">AI</span>
+    </a>
+  </header>
+
+  <main id="top">
+    <section class="story" id="story">
+      <div class="story__grid">
+        <aside class="story__copy" aria-live="polite">
+          <div class="story__steps" id="storySteps" role="tablist" aria-label="Steps"></div>
+          <p class="story__brand"><span class="grad-text">PatternFlow</span>&nbsp;AI</p>
+          <h1 class="story__title" id="storyTitle">Login</h1>
+          <p class="story__hint" id="storyHint">Press Next step</p>
+          <div class="story__extra" id="storyExtra" hidden></div>
+          <div class="story__progress" aria-hidden="true">
+            <span class="story__progress-fill" id="storyProgressFill"></span>
+          </div>
+          <div class="story__nav">
+            <button type="button" class="btn btn--ghost" id="btnPrevStep" disabled>Back</button>
+            <button type="button" class="btn btn--primary" id="btnNextStep">Next step</button>
+          </div>
+        </aside>
+
+        <div class="story__panel-col">
+          <div class="panel-float" id="panelFloat">
+            <div class="panel-viewport" id="panelViewport">
+              <div class="panel-scaler" id="panelScaler">
+              <!-- LOGIN -->
+              <div class="pf-panel pf-panel--login is-front" id="viewLogin" data-panel="login">
+                <div class="pf-panel__chrome"><span>PatternFlow AI</span></div>
+                <div class="pf-login">
+                  <h2 class="pf-login__title">PatternFlow AI</h2>
+                  <div class="pf-login__form">
+                    <label class="pf-field">
+                      <span>Username</span>
+                      <input type="text" id="mockUsername" value="" readonly tabindex="-1" placeholder="Enter your username">
+                    </label>
+                    <label class="pf-field">
+                      <span>Enter Access Password</span>
+                      <input type="password" id="mockPassword" value="" readonly tabindex="-1" placeholder="******">
+                    </label>
+                    <button type="button" class="pf-btn pf-btn--login" id="mockLoginBtn" tabindex="-1">Login</button>
+                  </div>
+                  <div class="pf-login__copy">
+                    <p>© 2024 MD. PIYAL HASAN. All rights reserved.</p>
+                    <p>This software is protected by copyright law. Unauthorized reproduction or distribution of this program, or any portion of it, may result in severe civil and criminal penalties.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MAIN — exact structure from PatternFlow-AI CEP extension -->
+              <div class="pf-panel pf-panel--app" id="viewApp" data-panel="main">
+                <div class="pf-panel__chrome"><span>PatternFlow AI</span></div>
+                <div class="pf-body adobe-panel" id="pfAppBody">
+                  <div id="app-container">
+                    <div id="controls">
+                      <button type="button" id="btnLoadJson" class="top-button" tabindex="-1">INPUT-LIST</button>
+                      <button type="button" id="btnSelectFolder" class="top-button" tabindex="-1">OUTPUT</button>
+                      <button type="button" id="btnOpenSizeEditor" class="settings-button" tabindex="-1" aria-label="Size Chart Editor">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+                          <path d="M12 1.5a1.5 1.5 0 0 1 1.5 1.5v1.31a1.5 1.5 0 0 0 1.29.98l1.62.27a1.5 1.5 0 0 1 1.41 1.83l-.52 1.79a1.5 1.5 0 0 0 .44 1.57l1.1 1.1a1.5 1.5 0 0 1 0 2.12l-1.1 1.1a1.5 1.5 0 0 0-.44 1.57l.52 1.79a1.5 1.5 0 0 1-1.41 1.83l-1.62.27a1.5 1.5 0 0 0-1.29.98V21a1.5 1.5 0 0 1-3 0v-1.31a1.5 1.5 0 0 0-1.29-.98l-1.62-.27a1.5 1.5 0 0 1-1.41-1.83l.52-1.79a1.5 1.5 0 0 0-.44-1.57l-1.1-1.1a1.5 1.5 0 0 1 0-2.12l1.1-1.1a1.5 1.5 0 0 0 .44-1.57l-.52-1.79a1.5 1.5 0 0 1 1.41-1.83l1.62-.27a1.5 1.5 0 0 0 1.29-.98V3a1.5 1.5 0 0 1 1.5-1.5zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div id="flow-selection-container" class="flow-buttons-row">
+                      <button type="button" id="btnFlow1" class="flow-btn" tabindex="-1">Flow-1</button>
+                      <button type="button" id="btnFlow2" class="flow-btn" tabindex="-1">Flow-2</button>
+                      <button type="button" id="btnCustomFlow" class="flow-btn" tabindex="-1">Custom-Flow</button>
+                      <button type="button" id="btnNesting" class="flow-btn" tabindex="-1">Nesting</button>
+                      <button type="button" id="btnFlowSettings" class="flow-settings-icon-btn" tabindex="-1" title="Flow Settings">
+                        <img src="./assets/icon/flow.svg" alt="" width="16" height="16">
+                      </button>
+                    </div>
+
+                    <div class="table-layout-wrapper">
+                      <div id="dataTableContainer">
+                        <table id="data-table">
+                          <thead>
+                            <tr>
+                              <th>NO</th>
+                              <th>NAME</th>
+                              <th>NUMBER</th>
+                              <th>SIZE</th>
+                              <th>SLV</th>
+                              <th>PANT-SIZE</th>
+                              <th>COMMENTS</th>
+                            </tr>
+                          </thead>
+                          <tbody id="mockTableBody"></tbody>
+                        </table>
+                      </div>
+                      <div class="table-actions-sidebar">
+                        <button type="button" id="btnToggleGuide" class="guide-toggle-button" tabindex="-1" title="Toggle Guide Row">▼</button>
+                        <button type="button" id="btnAddColumn" class="vertical-add-button" tabindex="-1" title="Add Custom Column">+</button>
+                      </div>
+                    </div>
+
+                    <div id="saveSettings" class="save-settings-container">
+                      <div class="header-tag">FILE EXPORT OPTIONS</div>
+                      <div class="format-option-group" id="tifOptionsGroup">
+                        <div class="group-header">
+                          <input type="checkbox" id="enableTif" tabindex="-1">
+                          <label for="enableTif">Export as TIF</label>
+                          <span class="toggle-arrow">▼</span>
+                        </div>
+                      </div>
+                      <div class="format-option-group active" id="epsOptionsGroup">
+                        <div class="group-header">
+                          <input type="checkbox" id="enableEps" checked tabindex="-1">
+                          <label for="enableEps">Export as EPS</label>
+                          <span class="toggle-arrow">▼</span>
+                        </div>
+                      </div>
+                      <div class="format-option-group" id="jpgOptionsGroup">
+                        <div class="group-header">
+                          <input type="checkbox" id="enableJpg" tabindex="-1">
+                          <label for="enableJpg">Export as JPG</label>
+                          <span class="toggle-arrow">▼</span>
+                        </div>
+                      </div>
+                      <div class="format-option-group" id="pdfOptionsGroup">
+                        <div class="group-header">
+                          <input type="checkbox" id="enablePdf" tabindex="-1">
+                          <label for="enablePdf">Export as PDF</label>
+                          <span class="toggle-arrow">▼</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="actions">
+                      <button type="button" id="btnStart" tabindex="-1">START</button>
+                      <button type="button" id="btnClearData" class="secondary-button" tabindex="-1">CLEAN INPUT DATA</button>
+                    </div>
+
+                    <div id="log-container">
+                      <div class="header-tag">STATUS / LOG</div>
+                      <div id="log-box">
+                        <div>[3:17:49 PM] Subscription valid until: 11/20/2026</div>
+                        <div>[3:17:49 PM] Usage: 34530 / 5e+26</div>
+                        <div>[3:17:49 PM] User: username</div>
+                        <div>[3:17:49 PM] Welcome to PatternFlow AI</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              </div><!-- /.panel-scaler -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="after-story">
+      <p id="afterStoryText">Common path done — Flow tours next.</p>
+    </section>
+  </main>
+
+  <div class="finish-stage" id="finishStage" hidden aria-live="polite">
+    <div class="finish-stage__card">
+      <div class="finish-stage__copy">
+        <p class="finish-stage__eyebrow"><span class="grad-text">PatternFlow</span>&nbsp;AI</p>
+        <h2 class="finish-stage__title">Congratulations!</h2>
+        <p class="finish-stage__text" id="finishStageText">PatternFlow AI finished processing. Collect your exported files from the OUTPUT folder you selected.</p>
+        <div class="finish-stage__actions">
+          <button type="button" class="btn btn--ghost" id="btnFinishBack">Back</button>
+        </div>
+      </div>
+      <div class="finish-stage__visual" aria-hidden="true">
+        <img class="finish-stage__folder" src="./assets/icon/folder.svg" alt="" width="120" height="100">
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p id="footerLine1">PatternFlow AI · Extension usermap</p>
+    <p>© MD. PIYAL HASAN</p>
+  </footer>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>
