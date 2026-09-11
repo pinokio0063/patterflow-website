@@ -87,15 +87,90 @@
     function applySvg(role, text, fileName, thumbId, nameId, slot) {
         var outline = CN.path.svgToOutline(text);
         if (!outline) {
-            alert('No <path> outline found in ' + fileName);
-            return;
+            console.warn('No <path> outline found in ' + fileName);
+            return false;
         }
         masters[role] = { outline: outline, fileName: fileName, rawName: outline.name, svgText: text };
-        slot.classList.add('has');
-        $(nameId).textContent = (outline.name || fileName) + ' · ' + outline.pathCount + ' path';
-        $(MEAS[role]).textContent = 'File size  ' + outline.inchW.toFixed(3) + ' × ' + outline.inchH.toFixed(3)
-            + ' in  (not a chart size — graded from this)';
-        showRawThumb($(thumbId), text, ROLE_COLOR[role]);
+        if (slot) slot.classList.add('has');
+        if (nameId && $(nameId)) {
+            $(nameId).textContent = (outline.name || fileName) + ' · ' + outline.pathCount + ' path';
+        }
+        if (MEAS[role] && $(MEAS[role])) {
+            $(MEAS[role]).textContent = 'File size  ' + outline.inchW.toFixed(3) + ' × ' + outline.inchH.toFixed(3)
+                + ' in  (not a chart size — graded from this)';
+        }
+        if (thumbId && $(thumbId)) showRawThumb($(thumbId), text, ROLE_COLOR[role]);
+        return true;
+    }
+
+    function classifySvgName(name) {
+        var n = String(name || '').toLowerCase();
+        if (/front|font/.test(n)) return 'font';
+        if (/back/.test(n)) return 'back';
+        if (/short|shrot|haf|half/.test(n)) return 'sleeve';
+        if (/long|full/.test(n)) return 'sleeveLong';
+        return null;
+    }
+
+    function renderPatternList(list) {
+        var host = $('patternList');
+        if (!host) return;
+        host.innerHTML = '';
+        (list || []).forEach(function (item) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'pattern-card';
+            btn.setAttribute('data-id', item.id);
+            var thumbs = '';
+            ['font', 'back', 'sleeve', 'sleeveLong'].forEach(function (k) {
+                if (item[k]) thumbs += '<img src="' + item[k] + '" alt="">';
+            });
+            btn.innerHTML = '<h3>' + item.name + '</h3><div class="pattern-thumbs">' + thumbs + '</div>';
+            btn.addEventListener('click', function () { selectPattern(item); });
+            host.appendChild(btn);
+        });
+    }
+
+    function selectPattern(item) {
+        var jobs = [
+            ['font', item.font],
+            ['back', item.back],
+            ['sleeve', item.sleeve],
+            ['sleeveLong', item.sleeveLong]
+        ].filter(function (row) { return row[1]; });
+        Promise.all(jobs.map(function (row) {
+            return fetchText(row[1]).then(function (text) {
+                return { role: row[0], text: text, name: row[1].split('/').pop() };
+            });
+        })).then(function (parts) {
+            masters = { font: null, back: null, sleeve: null, sleeveLong: null };
+            parts.forEach(function (p) { applySvg(p.role, p.text, p.name); });
+            Array.prototype.forEach.call(document.querySelectorAll('.pattern-card'), function (el) {
+                el.classList.toggle('on', el.getAttribute('data-id') === item.id);
+            });
+            if ($('patternStatus')) {
+                $('patternStatus').textContent = item.name + ' loaded'
+                    + (masters.font ? ' · FRONT' : '')
+                    + (masters.back ? ' · BACK' : '')
+                    + (masters.sleeve ? ' · HAF' : '')
+                    + (masters.sleeveLong ? ' · FULL' : '');
+            }
+        }).catch(function () {
+            if ($('patternStatus')) $('patternStatus').textContent = 'Could not load ' + item.name;
+        });
+    }
+
+    function loadPatternCatalog() {
+        return fetch('patterns/index.json').then(function (r) {
+            if (!r.ok) throw new Error('no catalog');
+            return r.json();
+        }).then(function (data) {
+            var list = Array.isArray(data) ? data : (data ? [data] : []);
+            renderPatternList(list);
+            if (list[0]) selectPattern(list[0]);
+        }).catch(function () {
+            if ($('patternStatus')) $('patternStatus').textContent = 'No patterns found';
+        });
     }
 
     var thumbUrls = {};
@@ -560,12 +635,7 @@
 
     function init() {
         fillSleeveSelect();
-        bindSlot('font', 'slotFont', 'fileFont', 'thumbFont', 'nameFont');
-        bindSlot('back', 'slotBack', 'fileBack', 'thumbBack', 'nameBack');
-        bindSlot('sleeve', 'slotSleeve', 'fileSleeve', 'thumbSleeve', 'nameSleeve');
-        bindSlot('sleeveLong', 'slotSleeveLong', 'fileSleeveLong', 'thumbSleeveLong', 'nameSleeveLong');
-
-        $('btnDemoParts').addEventListener('click', loadSampleParts);
+        loadPatternCatalog();
         $('btnAddRow').addEventListener('click', function () {
             jobRows.push(emptyRow());
             renderJob();
@@ -671,12 +741,6 @@
             if (info && info.engine === 'cpp') setSimTime(info.exe ? 'C++ engine · ready' : 'C++ exe missing — run engine\\build.bat');
         }).catch(function () {
             setSimTime(window.PF_NEST_API ? 'backend offline' : 'preview only · backend not connected');
-        });
-        [['thumbFont', 'FRONT — drop SVG'],
-         ['thumbBack', 'BACK — drop SVG'],
-         ['thumbSleeve', 'SHORT · HAF — drop SVG'],
-         ['thumbSleeveLong', 'LONG · FULL — drop SVG']].forEach(function (row) {
-            $(row[0]).innerHTML = '<div class="ph">' + row[1] + '</div>';
         });
         paint(true);
     }

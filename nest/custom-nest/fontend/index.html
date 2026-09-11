@@ -15,55 +15,6 @@
         </div>
         <div class="scroll">
             <div class="block">
-                <h2>Pattern parts</h2>
-                <div class="slots">
-                    <div class="slot FONT" id="slotFont" data-role="font">
-                        <div class="thumb" id="thumbFont"></div>
-                        <div class="meta">
-                            <span class="tag">FRONT</span>
-                            <span class="fname" id="nameFont">drop / click SVG</span>
-                        </div>
-                        <div class="measure" id="measFont"></div>
-                        <input type="file" id="fileFont" accept=".svg,image/svg+xml" />
-                    </div>
-                    <div class="slot BACK" id="slotBack" data-role="back">
-                        <div class="thumb" id="thumbBack"></div>
-                        <div class="meta">
-                            <span class="tag">BACK</span>
-                            <span class="fname" id="nameBack">drop / click SVG</span>
-                        </div>
-                        <div class="measure" id="measBack"></div>
-                        <input type="file" id="fileBack" accept=".svg,image/svg+xml" />
-                    </div>
-                    <div class="slot SLEEVE" id="slotSleeve" data-role="sleeve">
-                        <div class="thumb" id="thumbSleeve"></div>
-                        <div class="meta">
-                            <span class="tag">SHORT · HAF</span>
-                            <span class="fname" id="nameSleeve">drop / click SVG</span>
-                        </div>
-                        <div class="measure" id="measSleeve"></div>
-                        <input type="file" id="fileSleeve" accept=".svg,image/svg+xml" />
-                    </div>
-                    <div class="slot SLEEVE" id="slotSleeveLong" data-role="sleeveLong">
-                        <div class="thumb" id="thumbSleeveLong"></div>
-                        <div class="meta">
-                            <span class="tag">LONG · FULL</span>
-                            <span class="fname" id="nameSleeveLong">drop / click SVG</span>
-                        </div>
-                        <div class="measure" id="measSleeveLong"></div>
-                        <input type="file" id="fileSleeveLong" accept=".svg,image/svg+xml" />
-                    </div>
-                    <label style="display:block;font-size:11px;color:#9a9a9a">
-                        Rib (short + long)
-                        <select id="sleeveKey" style="width:100%;margin-top:3px"></select>
-                    </label>
-                </div>
-                <div class="job-tools" style="margin-top:8px">
-                    <button class="btn ghost" id="btnDemoParts" type="button">Load sample SVGs</button>
-                </div>
-            </div>
-
-            <div class="block">
                 <h2>Setup</h2>
                 <div class="grid2">
                     <div class="field">
@@ -79,10 +30,8 @@
                         <input id="inpRows" type="number" step="1" min="1" value="4" />
                     </div>
                     <div class="field">
-                        <label>Size chart</label>
-                        <select id="chartStatus" disabled>
-                            <option>default-sizes.json loaded</option>
-                        </select>
+                        <label>Rib (short + long)</label>
+                        <select id="sleeveKey"></select>
                     </div>
                 </div>
             </div>
@@ -155,6 +104,15 @@
             </div>
         </section>
     </main>
+
+    <aside class="pattern-rail">
+        <div class="pattern-head">
+            <h2>Patterns</h2>
+            <p>Select a style</p>
+        </div>
+        <div class="pattern-list" id="patternList"></div>
+        <div class="pattern-status" id="patternStatus">No pattern selected</div>
+    </aside>
 </div>
 
 <script src="js/config.js"></script>

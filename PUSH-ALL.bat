@@ -71,6 +71,10 @@ call npx --yes wrangler deploy --config wrangler.library.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
+echo Syncing nest patterns...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0sync-nest-patterns.ps1"
+
+echo.
 echo [7/7] Deploy nest.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.nest.jsonc
 if errorlevel 1 goto :deployfail
