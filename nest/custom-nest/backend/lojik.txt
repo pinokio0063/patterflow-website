@@ -1,0 +1,79 @@
+'''আমি সব লজিক একসাথে বলছি আবার কারন অনে অপ্রয়োজনিয় লজিক রয়েগেছে যা সিস্টেম স্লো করে দিচ্ছে।
+
+১। মেক্স ডায়ার সর্বচ্চ ডায়ার ইউজ করে বডি বসানো বাম থেকে ডানে। সর্বচ্চ চেষ্টা করবে বডি বসানোর পর ডায়ার গ্যাপ ০ তে নামানো। যত কম সম্ভব ডায়ার অবশিষ্ট গ্যাপ করা বডি বসিয়ে।
+এভাবে করে বডি রো তৈরি হতে থাকবে।
+
+২। বডি বসানো শেষ এখন হাফ স্লিভ বসানো হবে। হাফ স্লিভ প্রথমে সেই সকল বডির রোতে বসাবে যে সকল রোতে ২টা বডি মাএ বসেছে,
+বডি-১, বডি-২ সেই রো মেক্স ডায়ার অনুযায়ী ২ পাশে করে দিবে মানে বডি-১ সবার বাম পাশে আর বডি-২ একদম ডান পাশে চলে যাবে।
+স্লিভ মাজে পজিশন হবে তবে রেন্ডমলি হবেনা প্রথমে স্লিভ সেই রো এর টপ এলাইন হবে এবং স্লিভ ১৮০ ডিগ্রি রোটেশন করে দিবে এর পর স্লিভটা বডি-২ এর সাথে true গ্যাপে পজিশন হবে যাতে প্রথমে বডি-২ এবং বডি-১ ওভারলে না হয় যদি বডি-১ ওভারলে করে তাহলে স্লিভ কিছুটা নিচে নামিয়ে চেক দিবে ওভারলে হচ্ছে কিনা যদি তাও ওভারলে হয় তাহলে বডি-১ ১৮০ডিগ্রি রোটেশন থেকে ০ ডিগ্রি রোটেশন করে দিবে তাহলে আশা করি পজিশন হবে ওভারলে থাকবেনা। আর যদি বডি-১ ১৮০ডিগ্রি থেকে ০ডিগ্রি রোটেশন ছাড়াই স্লিভ সেই রোতে টপে পজিশন হয়ে যায় তাহলে সেম রোতে সেম সাইজের একটা স্লিভ রো এর ডাউনে পজিশন করে দিবে তবে এই স্লিভ ০ ডিগ্রি থাকবে সেম সাইজ না থাকলে ছোট সাইজ বের করা হবে যেহেতু উপরে সেম রোতে উপরে স্লিভ পজিশন হয়েছে তাই নিচেও স্লিভ পজিশন হয়ে যাবে রো এর নিচের স্লিভ ওভারলে হলে স্লিভ কিছুটা উপরে উঠিয়ে চেক দিবে ওয়ারলে হচ্ছেকিনা ১০০% পজিশন হবে ওভারলে ছাড়া কারন উপরের স্লিভ পজিশন হয়েছে। এর পর সেম সাইজের আরেকটা স্লিভ উপরে স্লিভ এবং মাজের স্লিভের মাজে আরেকটা স্লিভ ওভারলে ছাড়া পজিশন করবে পজিশন না হলে ছোট সাইজের স্লিভ পজিশন করে দিবে।
+
+
+৩। বাকি স্লিভ গুলো সকল বডি নিচে পজিশন হবে ১ম রো বাম থেকে ডানে এভাবে তারপর ২য় রো ডান থেকে বামে আবার ৩য় রো বাম থেকে ডানে আবার ৪র্থ রো ডান থেকে বামে এভাবে হবে... ।
+স্লিভের প্রথম রো ১৮০ ডিগ্রি রোটেশন থাকবে মানে প্রথম রো এর স্লিভ গুলো ১৮০ ডিগ্রি রোটেশনে থাকবে ২য় রো এর স্লিভ ০ ৩য় রো এর স্লিভ ১৮০ তারপরে রো এর স্লিভ ০ এভাবে হবে।
+এরপর প্রথম রো আর ২য় রো মানে জোড় আর বিজোড় রো মিলে ইন্টারলকিং হবে এভাবে করে ৩য় আর ৪র্থ... হবে। ২টা রো মিলে ইন্টারলকিং হলে সেটা হবে একটা হাফ স্লিভ বল্ক। ইন্টারলকিং true গ্যাপে হবে।
+
+
+৪। সকল হাফ স্লিভ পজিশনের পর ফুল স্লিভ পজিশন হবে। ফুল স্লিভ ছোট সাইজ থেকে বড় সাইজে পজিশন হবে। true গ্যাপে পজিশন হবে।
+ফুল স্লিভ উপরে পুশ দিবে উপরে গ্যাপ থাকলে মানে বডিতে যদি গ্যাপ থাকে সেখানে ফুল স্লিভ হবে।
+আমাদের ২য় লজিক মনে আছে হাফ স্লিভ পজিশনের লজিক, সেই লজিকে প্রথম স্লিভ টা রো এর টপ এলাইনে ১৮০ ডিগ্রি রোটেশন করে পজিশন করছি যদি স্লিভ নিচে নামিয়েও true গ্যাপে পজিশন না হতো তাহলে বডি-১ ১৮০ডিগ্রি রোটেশন থেকে ০ ডিগ্রি রোটেশন করে দিবে সেখানে ১০০% হাফ স্লিভ পজিশন হয়ে যাবে সেই পজিশন হাফ স্লিভের আগে ফুল স্লিভ আগে বসার অগ্রাধিকার পাবে বা বলা যায় তখন সেখানে ফুল স্লিভ পজিশন হবে আর হাফ স্লিভ নিচে চলে আসবে। ফুল স্লিভ তখন হবে যখন বডি-১ ১৮০ ডিগ্রি থেকে ০ ডিগ্রি হবে তখন।
+
+এই হলো আমার ৪টা লজিক সম্পুর্ন নেস্টিং ইঞ্জিল চালানোর জন্য এই ৪টা যথেষ্ট যদি কোন প্রশ্ন থাকে বলতে পার।'''
+
+
+
+
+
+
+
+'''Role: You are an expert Python/Algorithm Developer. Your task is to implement an optimized nesting engine based on the 4 precise logic rules provided below. Remove any redundant logic that slows down the system. Avoid hallucinations and stick strictly to these rules.
+
+---
+
+### **Nesting Engine Logic Rules:**
+
+#### **Rule 1: Body Placement (Left to Right)**
+- Place bodies from left to right using the maximum available dryer width.
+- Maximize body placement to reduce the remaining dryer gap to **0** (or as close to 0 as possible).
+- Continue this process to form the body rows.
+
+#### **Rule 2: Half Sleeve Placement (Special Rows with 2 Bodies)**
+- Apply this only to rows that contain exactly **2 bodies** (Body-1 on the far left, Body-2 on the far right).
+- **Step 1:** Position the first sleeve at the top-align of the row with a **180-degree rotation**.
+- **Step 2:** Place it with a `true gap` relative to Body-2 to avoid overlapping.
+- **Step 3:** If it overlaps with Body-1, move the sleeve slightly down and check again.
+- **Step 4:** If overlap still persists, rotate Body-1 from **180° to 0°** rotation, which will clear the space without overlap.
+- **Step 5 (Bottom Sleeve):** If the top sleeve is successfully placed *without* needing to rotate Body-1 (keeping Body-1 at 180°), then place another sleeve of the same size at the bottom of the same row with **0° rotation**. If the exact size doesn't fit, use a smaller size. If it overlaps, move it slightly up to ensure 100% placement.
+- **Step 6 (Middle Sleeve):** Place another sleeve between the top and bottom sleeves with a `true gap` (same size preferred, smaller size if needed).
+
+#### **Rule 3: Remaining Half Sleeves & Interlocking Blocks**
+- Place the remaining sleeves below all bodies:
+  - Row 1: Left to Right (180° rotation)
+  - Row 2: Right to Left (0° rotation)
+  - Row 3: Left to Right (180° rotation)
+  - Row 4: Right to Left (0° rotation)
+  - (Continue this alternating pattern).
+- Interlock Row 1 & Row 2 (even and odd rows) using a `true gap`. Two interlocked rows form a **Half Sleeve Block**.
+
+#### **Rule 4: Full Sleeve Placement & Priority**
+- Place full sleeves *after* all half sleeves are positioned.
+- Sort and place full sleeves from **smallest to largest size** using a `true gap`.
+- Full sleeves must push upward into any available gaps in the body section.
+- **Priority Rule (from Rule 2):** In Rule 2, if Body-1's rotation is changed from **180° to 0°** to accommodate a half sleeve, that specific position will give **highest priority to Full Sleeves**. In this case, the Full Sleeve will be placed there first, and the Half Sleeve will be pushed down.
+
+---
+### **Instructions for Code Generation:**
+1. Keep the code clean, modular, and optimized (avoid heavy/redundant loops that slow down performance).
+2. Use clear variable names for coordinates, rotations (0°/180°), and `true gap` calculations.
+3. If any edge case is unclear, ask me before assuming. Write the implementation now.'''
+
+
+
+
+
+
+
+
+
+
+
+

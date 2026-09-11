@@ -1,0 +1,50 @@
+[
+  {
+    "NAME": "MX1",
+    "NUMBER": "1",
+    "SIZE": "S",
+    "SLV": "HAF",
+    "PANT-SIZE": "S",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  },
+  {
+    "NAME": "MX2",
+    "NUMBER": "2",
+    "SIZE": "M",
+    "SLV": "HAF",
+    "PANT-SIZE": "M",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  },
+  {
+    "NAME": "MX3",
+    "NUMBER": "3",
+    "SIZE": "L",
+    "SLV": "HAF",
+    "PANT-SIZE": "L",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  },
+  {
+    "NAME": "MX4",
+    "NUMBER": "4",
+    "SIZE": "XS",
+    "SLV": "HAF",
+    "PANT-SIZE": "XS",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  },
+  {
+    "NAME": "MX5",
+    "NUMBER": "5",
+    "SIZE": "M",
+    "SLV": "HAF",
+    "PANT-SIZE": "M",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  },
+  {
+    "NAME": "MX6",
+    "NUMBER": "6",
+    "SIZE": "L",
+    "SLV": "HAF",
+    "PANT-SIZE": "L",
+    "COMMENTS": "target: 0-21-6-COPY-HAF mixed-sizes"
+  }
+]

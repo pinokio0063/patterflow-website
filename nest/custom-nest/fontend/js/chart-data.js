@@ -1,0 +1,260 @@
+window.PF_CHART = {
+  "_config": {
+    "size_tag_template": "SIZE: #SIZE# - PatternFlow"
+  },
+
+"2Y": { "FONT_BACK": { "width": 13, "height": 19 },
+"short_slv_without_rib": { "width": 11.0998 , "height": 5.2896 },
+"short_slv_with_rib": { "width": 11.0998, "height": 6.3238 },
+"long_slv_without_rib": { "width": 11.0998, "height": 15.1156 },
+"long_slv_with_rib": { "width": 11.0998, "height": 15.8752 },
+"pant": { "width": 29, "height": 22 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 14.8788, "height": 20.2892 },
+"RAGLAN-BACK": { "width": 14.8788, "height": 20.9655 },
+"RAGLAN-short_slv_without_rib": { "width": 11.9818, "height": 11.6543 },
+"RAGLAN-short_slv_with_rib": { "width": 11.9818, "height": 11.0475 },
+"RAGLAN-long_slv_without_rib": { "width": 11.9818, "height": 21.2781 },
+"RAGLAN-long_slv_with_rib": { "width": 11.9818, "height": 22.9829 }
+},
+
+"4Y": { "FONT_BACK": { "width": 14, "height": 20 },
+"short_slv_without_rib": { "width": 11.684 , "height": 5.568 },
+"short_slv_with_rib": { "width": 11.684, "height": 6.6566 },
+"long_slv_without_rib": { "width": 11.684, "height": 15.9111 },
+"long_slv_with_rib": { "width": 11.684, "height": 16.7108 },
+"pant": { "width": 18.5, "height": 14 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 15.5262, "height": 21.1720 },
+"RAGLAN-BACK": { "width": 15.5262, "height": 21.8778 },
+"RAGLAN-short_slv_without_rib": { "width": 12.5031, "height": 12.1614 },
+"RAGLAN-short_slv_with_rib": { "width": 12.5031, "height": 11.5282 },
+"RAGLAN-long_slv_without_rib": { "width": 12.5031, "height": 22.2040 },
+"RAGLAN-long_slv_with_rib": { "width": 12.5031, "height": 23.9829 }
+
+},
+
+
+"6Y": { "FONT_BACK": { "width": 15, "height": 21 },
+"short_slv_without_rib": { "width": 12.2682 , "height": 5.8464 },
+"short_slv_with_rib": { "width": 12.2682, "height": 6.9895 },
+"long_slv_without_rib": { "width": 12.2682, "height": 16.7067 },
+"long_slv_with_rib": { "width": 12.2682, "height": 17.5463 },
+"pant": { "width": 19.5, "height": 15 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 16.8209, "height": 22.9376 },
+"RAGLAN-BACK": { "width": 16.8209, "height": 23.7022 },
+"RAGLAN-short_slv_without_rib": { "width": 13.5458, "height": 13.1756 },
+"RAGLAN-short_slv_with_rib": { "width": 13.5458, "height": 12.4895 },
+"RAGLAN-long_slv_without_rib": { "width": 13.5458, "height": 24.0556 },
+"RAGLAN-long_slv_with_rib": { "width": 13.5458, "height": 25.9829 }
+},
+
+
+"8Y": { "FONT_BACK": { "width": 16, "height": 22 },
+"short_slv_without_rib": { "width": 12.8524 , "height": 6.1248 },
+"short_slv_with_rib": { "width": 12.8524, "height": 7.3223 },
+"long_slv_without_rib": { "width": 12.8524, "height": 17.5023 },
+"long_slv_with_rib": { "width": 12.8524, "height": 18.3819 },
+"pant": { "width": 20.5, "height": 16 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 17.4683, "height": 23.8204 },
+"RAGLAN-BACK": { "width": 17.4683, "height": 24.6144 },
+"RAGLAN-short_slv_without_rib": { "width": 14.0671, "height": 13.6827 },
+"RAGLAN-short_slv_with_rib": { "width": 14.0671, "height": 12.9702 },
+"RAGLAN-long_slv_without_rib": { "width": 14.0671, "height": 24.9814 },
+"RAGLAN-long_slv_with_rib": { "width": 14.0671, "height": 26.9829 }
+},
+
+
+"10Y": { "FONT_BACK": { "width": 17, "height": 24 },
+"short_slv_without_rib": { "width": 14.0208 , "height": 6.6815 },
+"short_slv_with_rib": { "width": 14.0208, "height": 7.988 },
+"long_slv_without_rib": { "width": 14.0208, "height": 19.0934 },
+"long_slv_with_rib": { "width": 14.0208, "height": 20.0529 },
+"pant": { "width": 21.5, "height": 17 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 18.1157, "height": 24.7032 },
+"RAGLAN-BACK": { "width": 18.1157, "height": 25.5267 },
+"RAGLAN-short_slv_without_rib": { "width": 14.5885, "height": 14.1898 },
+"RAGLAN-short_slv_with_rib": { "width": 14.5885, "height": 13.4509 },
+"RAGLAN-long_slv_without_rib": { "width": 14.5885, "height": 25.9073 },
+"RAGLAN-long_slv_with_rib": { "width": 14.5885, "height": 27.9829 }
+},
+
+
+
+"12Y": { "FONT_BACK": { "width": 18, "height": 26 },
+"short_slv_without_rib": { "width": 15.1892 , "height": 7.2802 },
+"short_slv_with_rib": { "width": 15.1892, "height": 8.6536 },
+"long_slv_without_rib": { "width": 15.1892, "height": 20.698 },
+"long_slv_with_rib": { "width": 15.1892, "height": 21.7247 },
+"pant": { "width": 22.5, "height": 18 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 18.7631, "height": 25.5860 },
+"RAGLAN-BACK": { "width": 18.7631, "height": 26.4389 },
+"RAGLAN-short_slv_without_rib": { "width": 15.1098, "height": 14.6969 },
+"RAGLAN-short_slv_with_rib": { "width": 15.1098, "height": 13.9316 },
+"RAGLAN-long_slv_without_rib": { "width": 15.1098, "height": 26.8331 },
+"RAGLAN-long_slv_with_rib": { "width": 15.1098, "height": 28.9829 }
+},
+
+
+"XS": { "FONT_BACK": { "width": 18, "height": 27 },
+"short_slv_without_rib": { "width": 15.7734, "height": 7.5539 },
+"short_slv_with_rib": { "width": 15.7734, "height": 8.9864 },
+"long_slv_without_rib": { "width": 15.7734, "height": 21.4971 },
+"long_slv_with_rib": { "width": 15.7734, "height": 22.5598 },
+"pant": { "width": 23.5, "height": 18 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 19.4105, "height": 26.4688 },
+"RAGLAN-BACK": { "width": 19.4105, "height": 27.3511 },
+"RAGLAN-short_slv_without_rib": { "width": 15.6312, "height": 15.2040 },
+"RAGLAN-short_slv_with_rib": { "width": 15.6312, "height": 14.4123 },
+"RAGLAN-long_slv_without_rib": { "width": 15.6312, "height": 27.7589 },
+"RAGLAN-long_slv_with_rib": { "width": 15.6312, "height": 29.9829 }
+},
+
+
+"S": { "FONT_BACK": { "width": 19, "height": 28 },
+"short_slv_without_rib": { "width": 16.3576, "height": 7.8337 },
+"short_slv_with_rib": { "width": 16.3576, "height": 9.3193 },
+"long_slv_without_rib": { "width": 16.3576, "height": 22.2933 },
+"long_slv_with_rib": { "width": 16.3576, "height": 23.3953 },
+"pant": { "width": 25, "height": 19 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 20.0578, "height": 27.3516 },
+"RAGLAN-BACK": { "width": 20.0578, "height": 28.2633 },
+"RAGLAN-short_slv_without_rib": { "width": 16.1525, "height": 15.7110 },
+"RAGLAN-short_slv_with_rib": { "width": 16.1525, "height": 14.8930 },
+"RAGLAN-long_slv_without_rib": { "width": 16.1525, "height": 28.6847 },
+"RAGLAN-long_slv_with_rib": { "width": 16.1525, "height": 30.9829 }
+},
+
+
+"M": { "FONT_BACK": { "width": 20, "height": 29 },
+"short_slv_without_rib": { "width": 16.9418, "height": 8.1134 },
+"short_slv_with_rib": { "width": 16.9418, "height": 9.6521 },
+"long_slv_without_rib": { "width": 16.9418, "height": 23.0895 },
+"long_slv_with_rib": { "width": 16.9418, "height": 24.2309 },
+"pant": { "width": 26.5, "height": 20 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 20.7052, "height": 28.2344 },
+"RAGLAN-BACK": { "width": 20.7052, "height": 29.1756 },
+"RAGLAN-short_slv_without_rib": { "width": 16.6738, "height": 16.2181 },
+"RAGLAN-short_slv_with_rib": { "width": 16.6738, "height": 15.3736 },
+"RAGLAN-long_slv_without_rib": { "width": 16.6738, "height": 29.6106 },
+"RAGLAN-long_slv_with_rib": { "width": 16.6738, "height": 31.9829 }
+},
+
+
+"L": { "FONT_BACK": { "width": 21, "height": 30 },
+"short_slv_without_rib": { "width": 17.526, "height": 8.3932 },
+"short_slv_with_rib": { "width": 17.526, "height": 9.9849 },
+"long_slv_without_rib": { "width": 17.526, "height": 23.8857 },
+"long_slv_with_rib": { "width": 17.526, "height": 25.0664 },
+"pant": { "width": 27.5, "height": 21 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 21.3526, "height": 29.1172 },
+"RAGLAN-BACK": { "width": 21.3526, "height": 30.0878 },
+"RAGLAN-short_slv_without_rib": { "width": 17.1952, "height": 16.7252 },
+"RAGLAN-short_slv_with_rib": { "width": 17.1952, "height": 15.8543 },
+"RAGLAN-long_slv_without_rib": { "width": 17.1952, "height": 30.5364 },
+"RAGLAN-long_slv_with_rib": { "width": 17.1952, "height": 32.9829 }
+},
+
+"XL": { "FONT_BACK": { "width": 22, "height": 31 },
+"short_slv_without_rib": { "width": 18.1102, "height": 8.673 },
+"short_slv_with_rib": { "width": 18.1102, "height": 10.3178 },
+"long_slv_without_rib": { "width": 18.1102, "height": 24.6819 },
+"long_slv_with_rib": { "width": 18.1102, "height": 25.902 },
+"pant": { "width": 29, "height": 22 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 22, "height": 30 },
+"RAGLAN-BACK": { "width": 22, "height": 31 },
+"RAGLAN-short_slv_without_rib": { "width": 17.7165, "height": 17.2323 },
+"RAGLAN-short_slv_with_rib": { "width": 17.7165, "height": 16.335 },
+"RAGLAN-long_slv_without_rib": { "width": 17.7165, "height": 31.4622 },
+"RAGLAN-long_slv_with_rib": { "width": 17.7165, "height": 33.9829 }
+
+},
+
+
+"2XL": { "FONT_BACK": { "width": 23, "height": 32 },
+"short_slv_without_rib": { "width": 18.6944, "height": 8.9527 },
+"short_slv_with_rib": { "width": 18.6944, "height": 10.6506 },
+"long_slv_without_rib": { "width": 18.6944, "height": 25.478 },
+"long_slv_with_rib": { "width": 18.6944, "height": 26.7375 },
+"pant": { "width": 30, "height": 23 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 22.6474, "height": 30.8828 },
+"RAGLAN-BACK": { "width": 22.6474, "height": 31.9122 },
+"RAGLAN-short_slv_without_rib": { "width": 18.2378, "height": 17.7394 },
+"RAGLAN-short_slv_with_rib": { "width": 18.2378, "height": 16.8157 },
+"RAGLAN-long_slv_without_rib": { "width": 18.2378, "height": 32.3880 },
+"RAGLAN-long_slv_with_rib": { "width": 18.2378, "height": 34.9829 }
+},
+
+
+"3XL": { "FONT_BACK": { "width": 24, "height": 33 },
+"short_slv_without_rib": { "width": 19.2786, "height": 9.2325 },
+"short_slv_with_rib": { "width": 19.2786, "height": 10.9834 },
+"long_slv_without_rib": { "width": 19.2786, "height": 26.2742 },
+"long_slv_with_rib": { "width": 19.2786, "height": 27.5731 },
+"pant": { "width": 31.5, "height": 24 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 23.2948, "height": 31.7656 },
+"RAGLAN-BACK": { "width": 23.2948, "height": 32.8244 },
+"RAGLAN-short_slv_without_rib": { "width": 18.7592, "height": 18.2465 },
+"RAGLAN-short_slv_with_rib": { "width": 18.7592, "height": 17.2964 },
+"RAGLAN-long_slv_without_rib": { "width": 18.7592, "height": 33.3138 },
+"RAGLAN-long_slv_with_rib": { "width": 18.7592, "height": 35.9829 }
+},
+
+
+"4XL": { "FONT_BACK": { "width": 25, "height": 34 },
+"short_slv_without_rib": { "width": 19.8628, "height": 9.5123 },
+"short_slv_with_rib": { "width": 19.8628, "height": 11.3162 },
+"long_slv_without_rib": { "width": 19.8628, "height": 27.0704 },
+"long_slv_with_rib": { "width": 19.8628, "height": 28.4087 },
+"pant": { "width": 32, "height": 25 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 23.9422, "height": 32.6484 },
+"RAGLAN-BACK": { "width": 23.9422, "height": 33.7367 },
+"RAGLAN-short_slv_without_rib": { "width": 19.2805, "height": 18.7536 },
+"RAGLAN-short_slv_with_rib": { "width": 19.2805, "height": 17.7770 },
+"RAGLAN-long_slv_without_rib": { "width": 19.2805, "height": 34.2397 },
+"RAGLAN-long_slv_with_rib": { "width": 19.2805, "height": 36.9829 }
+},
+
+
+"5XL": { "FONT_BACK": { "width": 26, "height": 35 },
+"short_slv_without_rib": { "width": 20.447, "height": 9.7921 },
+"short_slv_with_rib": { "width": 20.447, "height": 11.649 },
+"long_slv_without_rib": { "width": 20.447, "height": 27.8666 },
+"long_slv_with_rib": { "width": 20.447, "height": 29.2443 },
+"pant": { "width": 29, "height": 22 },
+"size_tag": { "width": 0, "height": 0.2 },
+
+"RAGLAN-FONT": { "width": 25.2369, "height": 34.4140 },
+"RAGLAN-BACK": { "width": 25.2369, "height": 35.5611 },
+"RAGLAN-short_slv_without_rib": { "width": 20.3232, "height": 19.7677 },
+"RAGLAN-short_slv_with_rib": { "width": 20.3232, "height": 18.7384 },
+"RAGLAN-long_slv_without_rib": { "width": 20.3232, "height": 36.0913 },
+"RAGLAN-long_slv_with_rib": { "width": 20.3232, "height": 38.9829 }
+}
+};

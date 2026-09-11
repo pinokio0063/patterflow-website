@@ -1,0 +1,6 @@
+[
+  { "NAME": "H1", "NUMBER": "1", "SIZE": "L", "SLV": "HAF" },
+  { "NAME": "H2", "NUMBER": "2", "SIZE": "M", "SLV": "HAF" },
+  { "NAME": "F1", "NUMBER": "3", "SIZE": "L", "SLV": "FULL" },
+  { "NAME": "F2", "NUMBER": "4", "SIZE": "XL", "SLV": "FULL" }
+]

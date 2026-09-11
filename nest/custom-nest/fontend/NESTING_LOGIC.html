@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PatternFlow · Nesting Logic</title>
+    <style>
+        :root {
+            --bg: #f6f4ef;
+            --ink: #222;
+            --muted: #666;
+            --line: #d8d4c8;
+            --font: #2ec4b6;
+            --back: #3d8bfd;
+            --haf: #f4a261;
+            --full: #e76f51;
+            --gap: #c8e6c9;
+            --dia: #ff8a80;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font: 15px/1.5 "Segoe UI", sans-serif;
+            color: var(--ink);
+            background: var(--bg);
+        }
+        header {
+            padding: 22px 28px 10px;
+            border-bottom: 1px solid var(--line);
+        }
+        header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 650; }
+        header p { margin: 0; color: var(--muted); font-size: 13px; }
+        main { padding: 18px 28px 48px; max-width: 920px; }
+        h2 { margin: 28px 0 8px; font-size: 16px; }
+        p.note { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+        .row {
+            display: flex;
+            align-items: stretch;
+            gap: 4px;
+            background: #fff;
+            border: 1px dashed #bbb;
+            padding: 8px;
+            margin: 0 0 8px;
+            position: relative;
+        }
+        .row::after {
+            content: "DIA";
+            position: absolute;
+            right: -2px; top: 0; bottom: 0;
+            width: 2px;
+            background: var(--dia);
+        }
+        .box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #111;
+            font-size: 11px;
+            font-weight: 650;
+            border-radius: 3px;
+            min-height: 44px;
+            text-align: center;
+            padding: 4px;
+        }
+        .FONT { background: var(--font); width: 22%; }
+        .BACK { background: var(--back); color: #fff; width: 22%; }
+        .HAF { background: var(--haf); width: 16%; min-height: 28px; }
+        .FULL { background: var(--full); color: #fff; width: 18%; }
+        .empty { background: var(--gap); width: 14%; color: #2e7d32; font-weight: 600; }
+        .tiny { width: 8%; }
+        ol { margin: 6px 0 0 18px; padding: 0; }
+        li { margin: 3px 0; }
+        .legend { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 8px 0 18px; font-size: 12px; }
+        .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+        code { background: #eee; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+        a { color: #1565c0; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>নেস্টিং লজিক</h1>
+    <p>Custom nest preview · <code>engine/nest.exe</code> · <a href="index.html">প্রিভিউ খুলুন</a> · <a href="FULL-SLVE/">ফুল ৪-রো ল্যাব</a></p>
+</header>
+<main>
+    <div class="legend">
+        <span><i style="background:#2ec4b6"></i>FRONT</span>
+        <span><i style="background:#3d8bfd"></i>BACK</span>
+        <span><i style="background:#f4a261"></i>HAF স্লিভ</span>
+        <span><i style="background:#e76f51"></i>FULL স্লিভ</span>
+        <span><i style="background:#c8e6c9"></i>ফাঁকা / লেফটওভার</span>
+        <span><i style="background:#ff8a80"></i>DIA লাইন</span>
+    </div>
+
+    <h2>১) শার্ট — DIA ভরে</h2>
+    <p class="note">১৮০ / ০ / ১৮০ / ০… বাম থেকে ডানে। মিক্স সাইজ এক লাইনে যাতে ফাঁকা ≈ ০ (XL+L+M সামনে, পরের লাইনে পিছন উল্টো)। ২+ বডি টপ-অ্যালাইন + উপরে পুশ।</p>
+    <div class="row">
+        <div class="box FONT">FRONT 180°</div>
+        <div class="box BACK">BACK 0°</div>
+        <div class="box FONT">FRONT 180°</div>
+        <div class="box empty tiny">ফাঁকা</div>
+    </div>
+    <ol>
+        <li>যেখানে বডি বসানো যায়, বডিই আগে। স্লিভ সেই ফাঁকায় যায় পরে। বডি X আগে বক্স (AABB) + true-shape ±২ ইঞ্চি; বক্স লেফটওভার না ঢুকলে (২১+২১+২১ / ৬২.৮৫) কার্ভে true-shape নেস্ট।</li>
+        <li>এক রোতে ২+ বডি সবাই <b>টপ-এলাইন</b>, তারপর উপরে চাপে। ওভারলে ডানে নজেও না সরলে শেষ বডি পরের রোতে যায়।</li>
+        <li>৩টা বসে ওভারলে হলে ডানে সামান্য সরবে — শুধু min gap ফেরাতে। বড় গ্যাপ খুলবে না।</li>
+        <li>ডানে জায়গা না থাকলে ৩টা রোতেই থাকবে; জোর করে সরানো হবে না।</li>
+    </ol>
+
+    <h2>২) হাফ — শুধু ২-শার্ট লাইন</h2>
+    <p class="note">৩-শার্ট লাইনে আর্মহোল/মাঝে হাতা নয় (রুল ৬ স্টেপ আলাদা)। ২-শার্ট ফাঁকে আগে ফুল X-সেন্টার (০°/১৮০°), বড়→ছোট। true গ্যাপে যত উপরে যায় (উপরের রোতে ঢুকলেও গায়ে না)। প্রতি DOC-এর প্রথম রোতে মাঝের হাফ/ফুল টপ-অ্যালাইন পিন/ফ্রিজ (চাপে না; পরের রো চুরি করে না)। আগের DOC আটকালে পুরো রো নামায়, স্লিভ পকেটে হাঁটে না। উপরের রো নাই = টপ-অ্যালাইন। ১৮০°-এ না বসলে ফ্লিপ করে ফুল আবার, হাফের আগে। ফুল নাই/না বসলে আগের হাফ রুল। প্রতি রোয়ের প্রথম হাফ X-মাঝে: AABB ওভারলে হলে আর্মহোল (উপর টপ-এলাইন — উপরের রো আটকালে পুরো রো নামায়, স্লিভ পকেটে নামে না; আর্মহোল আটকালে ছোট tuck / নিচ হিম-এলাইন, ফিট না হলেই সরবে; পরিষ্কার বসলে পিন; ওভারলে কখনো পিন নয়; কাছে টানে না; মাঝে তৃতীয়; ৩টা পরিষ্কার হলে বডি+স্লিভ পিন); না হলে নিচে স্ট্যাক। DIA ভরে লেফটওভার ≈০ = বডি পিন (ওভারলে থাকলে নয়)। ফুলে AABB চেক নয়।</p>
+    <div class="row">
+        <div class="box FONT" style="width:22%">বাম</div>
+        <div class="box HAF">↑ ১৮০</div>
+        <div class="box HAF">মাঝ</div>
+        <div class="box HAF">↓ ০</div>
+        <div class="box BACK" style="width:22%">ডান</div>
+    </div>
+
+    <h2>৬) হাফ পকেট — ১-শার্ট ডান / ৩-শার্ট স্টেপ</h2>
+    <p class="note">শুধু হাফ। ২-শার্ট রুল ২। ১-শার্ট: ডানে DIA পর্যন্ত, রো-হিম ওভার নয়। ৩+ শার্ট: রো-হিমের চেয়ে খাটো প্রতিটার নিচে (ছোট স্টেপও); রো-হিম ওভার নয়। বড়→ছোট। রুল ২-এর পর, রুল ৩-এর আগে।</p>
+    <div class="row">
+        <div class="box FONT" style="width:22%">১ বডি</div>
+        <div class="box HAF">হাফ</div>
+        <div class="box HAF">হাফ</div>
+        <div class="box empty">DIA</div>
+    </div>
+    <div class="row">
+        <div class="box FONT" style="width:22%; min-height:64px">৩১"</div>
+        <div class="box BACK" style="width:22%; min-height:58px">৩০"</div>
+        <div class="box FONT" style="width:18%; min-height:36px">২০"</div>
+        <div class="box HAF" style="align-self:flex-end">স্টেপ</div>
+    </div>
+
+    <h2>৩) নিচের হাফ ব্লক</h2>
+    <p class="note">বিজোড় লাইন বাম→ডান ১৮০°। জোড় লাইন ডান→বাম ০°। ৩+৩ / ৪+৪ / ৫+৫ ইন্টারলক = ১ ব্লক; ৩+২ ও ৩+১ও ব্লক। দুই রোয়ের সব স্লিভ DIA-তে সেন্টার/স্প্রেড। স্প্রেডের পর রো-২ একই পজিশনে থেকে রো-১-এ true গ্যাপ পর্যন্ত উপরে চাপে (৩+২ হেম এক লাইন)। এক লাইন ব্লক নয় — শেষ শার্ট-কাগজের নিচে।</p>
+    <div class="row">
+        <div class="box HAF">১৮০</div>
+        <div class="box HAF">১৮০</div>
+        <div class="box HAF">১৮০</div>
+    </div>
+
+    <h2>৪) ফুল</h2>
+    <p class="note">রুল ২-এর ২-শার্ট ফাঁক আগের মতো। নিচের লেফটওভার ফুল: ফ্ল্যাট ৫/৬ যদি ঢোকে; না ঢুকলে ন্যূনতম জিপার। প্রথম ফুল রো বডি/হাফে চাপে না। পরের ফুল রো পুরো স্ল্যাব উপরে — একটা স্লিভ উপরের ফুল রোয় true গ্যাপ লাগলেই থামে। শেষ বডি DOC।</p>
+    <div class="row">
+        <div class="box FONT" style="width:22%">বডি 0°</div>
+        <div class="box FULL" style="width:28%">ফুল</div>
+        <div class="box BACK" style="width:22%">বডি 0°</div>
+    </div>
+
+    <h2>৫) ডকুমেন্ট</h2>
+    <ol>
+        <li>৪টা বডি রো = ১ ডক।</li>
+        <li>হাফ নিচের ব্লক শুধু ইন্টারলক হলে DOC-এ যায় (৩+৩ / ৪+৪ / ৫+৫ / ৬+৬… এবং ৩+২ / ৩+১): ব্লক ১ → ডক ১… ভাঙা হয় না। শুধু এক রো ব্লক নয় — শেষ বডি ডকের নিচে থাকে, স্লিভ-only নতুন ডক নয়।</li>
+        <li>এক ডক সর্বোচ্চ ১৯০ in।</li>
+        <li>ফুল লেফটওভার রো শেষ বডি ডকে থাকে (উপরে চাপা ইন্টারলক রাখে)।</li>
+        <li>ওভারলে = লাল (মার্ক লক)। গায়ে লাগা / গ্যাপ ০ পিস কখনো পিন/লক নয়। চেক প্রতি ডকের পেজ-কপিতে, বডিসহ।</li>
+    </ol>
+
+    <h2>৭) চালানো</h2>
+    <p class="note"><code>start.bat</code> → <code>http://127.0.0.1:8765/</code> → Ctrl+F5 → SIMULATE। <code>python -m http.server</code> দিয়ে ৮৭৬৫ চালাবেন না। ৪টা ফুল রো হাতে সাজাতে: <a href="FULL-SLVE/"><code>FULL-SLVE/</code></a> (Analyze মাপে, ইঞ্জিন লক থাকে)।</p>
+    <p class="note">DEV ট্রায়াল রেকর্ডার (লজিক ডিবাগ): সাইডবারে অন। পাবলিক কাট: <code>engine/pf_dev.hpp</code> এ <code>PF_DEV_TRIALS 0</code>, আর <code>js/dev-trials.js</code> + index.html DEV প্যানেল ডিলিট।</p>
+</main>
+</body>
+</html>

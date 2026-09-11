@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PatternFlow · FULL sleeve 4-row lab</title>
+    <link rel="stylesheet" href="lab.css" />
+</head>
+<body>
+<div class="lab">
+    <aside class="side">
+        <h1>FULL ৪-রো ল্যাব</h1>
+        <p class="sub">ইঞ্জিন বদলায় না। আপনি সঠিক রো সাজান, Analyze মাপে। <a href="../index.html">নেস্ট প্রিভিউ</a></p>
+
+        <h2>আপনি যা করবেন</h2>
+        <ol class="steps">
+            <li>লম্বা হাতার SVG দিন, বা স্যাম্পল লোড থাকবে।</li>
+            <li>৪টা কপি ছোট→বড় আসবে।</li>
+            <li>টেনে সাজান। <b>R</b> = ০°/১৮০°। অ্যারো = ০.০৫ in।</li>
+            <li><b>Analyze</b> — রোটেশন, টপ/হেম, ড্রপ, true গ্যাপ।</li>
+            <li>রিপোর্ট কপি বা JSON সেভ করে চ্যাটে দিন।</li>
+        </ol>
+
+        <div class="drop" id="drop">
+            <span class="tag">LONG · FULL SVG</span>
+            <span class="fname" id="fname">ড্রপ / ক্লিক</span>
+            <input id="fileSvg" type="file" accept=".svg,image/svg+xml" />
+        </div>
+
+        <div class="grid2" style="margin-top:10px">
+            <div class="field">
+                <label>কয়টা স্লিভ</label>
+                <input id="inpCount" type="number" min="3" max="5" value="4" />
+            </div>
+            <div class="field">
+                <label>Min gap (in)</label>
+                <input id="inpGap" type="number" step="0.01" min="0" value="0.05" />
+            </div>
+            <div class="field">
+                <label>DIA (in)</label>
+                <input id="inpDia" type="number" step="0.01" min="20" value="63" />
+            </div>
+        </div>
+
+        <div class="btns">
+            <button class="btn-ghost" id="btnSample" type="button">স্যাম্পল SVG</button>
+            <button class="btn-ghost" id="btnDeal" type="button">নতুন র‍্যান্ডম সাইজ</button>
+            <button class="btn-full" id="btnRot" type="button">০° / ১৮০°</button>
+            <button class="btn-go" id="btnAnalyze" type="button">Analyze</button>
+            <button class="btn-ghost" id="btnCopy" type="button">রিপোর্ট কপি</button>
+            <button class="btn-ghost" id="btnSave" type="button">গোল্ড JSON</button>
+        </div>
+        <p class="hint" id="status"></p>
+        <p class="hint">লাল DIA লাইনের ভিতরে রাখুন। ওভারল্যাপ রাখবেন না। সঠিক মনে হলেই Analyze।</p>
+    </aside>
+
+    <div class="stage-wrap">
+        <div class="toolbar">
+            <span id="selInfo">লোড হচ্ছে…</span>
+        </div>
+        <div class="board" id="board">
+            <svg id="stage" xmlns="http://www.w3.org/2000/svg">
+                <rect id="diaRect" fill="#1e1e1e" stroke="#333" />
+                <line id="diaLine" stroke="#ff8a80" stroke-width="2" stroke-dasharray="6 4" />
+                <g id="shapes"></g>
+            </svg>
+        </div>
+    </div>
+
+    <aside class="report">
+        <h1>Analyze</h1>
+        <p class="sub">ইঞ্জিনের সাথে তুলনা শুধু মাপে — লকড রুল আপনি না বলা পর্যন্ত বদলাবে না।</p>
+        <div class="facts" id="facts">
+            <p>সাজানোর পর Analyze চাপুন।</p>
+        </div>
+    </aside>
+</div>
+
+<script src="../js/path.js"></script>
+<script src="../js/geom.js"></script>
+<script src="lab.js"></script>
+</body>
+</html>

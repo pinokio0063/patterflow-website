@@ -1,0 +1,13 @@
+{
+  "name": "patterflow-nest",
+  "compatibility_date": "2026-09-11",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./nest/custom-nest/fontend",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "nest.patternflow.fit", "custom_domain": true }
+  ]
+}

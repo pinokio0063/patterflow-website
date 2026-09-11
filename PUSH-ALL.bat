@@ -37,7 +37,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [1/6] GitHub e push...
+echo [1/7] GitHub e push...
 git push origin main
 if errorlevel 1 (
   echo Push fail hoise.
@@ -46,28 +46,33 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/6] Deploy use.patternflow.fit ...
+echo [2/7] Deploy use.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.use.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [3/6] Deploy price.patternflow.fit ...
+echo [3/7] Deploy price.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.price.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [4/6] Deploy layouts.patternflow.fit ...
+echo [4/7] Deploy layouts.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.layouts.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [5/6] Deploy sheet.patternflow.fit ...
+echo [5/7] Deploy sheet.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.sheet.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [6/6] Deploy library.patternflow.fit ...
+echo [6/7] Deploy library.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.library.jsonc
+if errorlevel 1 goto :deployfail
+
+echo.
+echo [7/7] Deploy nest.patternflow.fit ...
+call npx --yes wrangler deploy --config wrangler.nest.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
@@ -80,6 +85,7 @@ echo Price:   https://price.patternflow.fit/
 echo Layouts: https://layouts.patternflow.fit/
 echo Sheet:   https://sheet.patternflow.fit/
 echo Library: https://library.patternflow.fit/
+echo Nest:    https://nest.patternflow.fit/
 echo.
 pause
 exit /b 0
