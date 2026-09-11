@@ -6,3 +6,6 @@ Desktop.ini
 *.log
 .vscode/
 .idea/
+usermap page/
+*.zip
+node_modules/
