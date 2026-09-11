@@ -1,0 +1,137 @@
+[
+  {
+    "id": "pattern-01",
+    "title": "POLO-V1",
+    "folder": "POLO-V1",
+    "fileName": "POLO-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/6uissju1a35vqnjxlp7mv/POLO-V1.ai?rlkey=onvsz37l9dmgpdbr18x22esmg&st=u6wxxp9p&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-02",
+    "title": "POLO-V2",
+    "folder": "POLO-V2",
+    "fileName": "POLO-V2",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/jlq8vshry1azr3ybbmwwa/POLO-V2.ai?rlkey=5okh2nquy5kgb903udyf4n2zv&st=8516fpld&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-021",
+    "title": "POLO-V3",
+    "folder": "POLO-V3",
+    "fileName": "POLO-V3",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/m4asl4pbb8j9kp86pgkdu/POLO-V3.ai?rlkey=jsmfkmxqcdfw440wn4g0zabdi&st=q66vezja&dl=1",
+    "flows": ["flow-2","custom-flow"]
+  },
+  {
+    "id": "pattern-024",
+    "title": "POLO-V4",
+    "folder": "POLO-V4",
+    "fileName": "POLO-V4",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/9q4is7xyu2dw1bh6g4s2x/POLO-V4.ai?rlkey=2zyynn55ocq4i3o3y1os579kc&st=ajftbf1d&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-03",
+    "title": "T-SHIRT-V1",
+    "folder": "T-SHIRT-V1",
+    "fileName": "T-SHIRT-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/tl75wwlja9tmvz5we7qri/T-SHIRT-V1.ai?rlkey=ldrzvchanseir4eyn0cdf4g7m&st=9shf4xnn&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-04",
+    "title": "T-SHIRT-V2",
+    "folder": "T-SHIRT-V2",
+    "fileName": "T-SHIRT-V2",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/l250szsc42nqj2cojrioe/T-SHIRT-V2.ai?rlkey=bog3hep25390cbpy5er2z4qxg&st=p08akvtl&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-05",
+    "title": "V-NECK-V1",
+    "folder": "V-NECK-V1",
+    "fileName": "V-NECK-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/25zvys14l0tge3g0l5hul/V-NECK-V1.ai?rlkey=s7d9fvbzvyfytftiar4nxbxva&st=2iru0spg&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-06",
+    "title": "Y-NECK-V1",
+    "folder": "Y-NECK-V1",
+    "fileName": "Y-NECK-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/4vw43tq4gw6geanpc9n6i/Y-NECK-V1.ai?rlkey=prlz6fsdz6jns6ikdzd57pp56&st=uu54wagn&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-07",
+    "title": "Y-NECK-V2",
+    "folder": "Y-NECK-V2",
+    "fileName": "Y-NECK-V2",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/hw20kdxk0cw1meahm369n/Y-NECK-V2.ai?rlkey=xz6jdt3o0e7v8lxqe0mjxinab&st=asxolnin&dl=1",
+    "flows": ["flow-1", "flow-2"]
+  },
+  {
+    "id": "pattern-08",
+    "title": "PANT-V1",
+    "folder": "PANT-V1",
+    "fileName": "PANT-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/y5dmyfvrqguuxh26wucfi/PANT-V1.ai?rlkey=2ybv27vgbinuzz1s7gx803t39&st=bdvipg6r&dl=1",
+    "flows": ["flow-1"]
+  },
+  {
+    "id": "pattern-09",
+    "title": "PANT-V2",
+    "folder": "PANT-V2",
+    "fileName": "PANT-V2",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/had07s0ibzrao0g7kw263/PANT-V2.ai?rlkey=5ajt93pvicvzork7t2s67bfgs&st=507b7o7d&dl=1",
+    "flows": ["flow-1"]
+  },
+  {
+    "id": "pattern-10",
+    "title": "RAGLAN-POLO-V1",
+    "folder": "RAGLAN-POLO-V1",
+    "fileName": "RAGLAN-POLO-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/v2zwegwws52uwqhtexp4g/RAGLAN-POLO-V1.ai?rlkey=ku2tu2socpdgle5f9s8z6qdaq&st=kniy5y4u&dl=1",
+    "flows": ["flow-2","custom-flow"]
+  },
+  {
+    "id": "pattern-11",
+    "title": "RAGLAN-T-SHIRT-V1",
+    "folder": "RAGLAN-T-SHIRT-V1",
+    "fileName": "RAGLAN-T-SHIRT-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/23kelfcwfyptc92224l4w/RAGLAN-T-SHIRT-V1.ai?rlkey=5mxqihuk1o6g0ebamq27dl9pd&st=xkcyzxmn&dl=1",
+    "flows": ["flow-2","custom-flow"]
+  },
+  {
+    "id": "pattern-12",
+    "title": "RAGLAN-V-NECK-V1",
+    "folder": "RAGLAN-V-NECK-V1",
+    "fileName": "RAGLAN-V-NECK-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/s1sd9bwjg0l8p46duiwzk/RAGLAN-V-NECK-V1.ai?rlkey=4h9pe05t2mvk45a5xefdaet9g&st=2i0lntdi&dl=1",
+    "flows": ["flow-2","custom-flow"]
+  },
+  {
+    "id": "pattern-13",
+    "title": "RAGLAN-Y-NECK-V1",
+    "folder": "RAGLAN-Y-NECK-V1",
+    "fileName": "RAGLAN-Y-NECK-V1",
+    "imgExt": "jpg",
+    "dropboxUrl": "https://www.dropbox.com/scl/fi/yqdrbqegps3etxa1gk4ag/RAGLAN-Y-NECK-V1.ai?rlkey=yk74om2mexnjw7d0f2vvrhuzk&st=zovuzp5y&dl=1",
+    "flows": ["flow-2","custom-flow"]
+  }
+]

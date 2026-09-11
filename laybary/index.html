@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PatternFlow — Sublimation Pattern Library (.AI)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #07080d;
+  --white: #ffffff;
+  --p1: #D300FF;
+  --p3: #34E3F8;
+  --grad: linear-gradient(135deg, #D300FF 0%, #8800FF 50%, #34E3F8 100%);
+  --grad-btn: linear-gradient(90deg, #D300FF, #8800FF);
+  --surface: #0e0f17;
+  --surface2: #13141f;
+  --surface3: #1a1b28;
+  --border: rgba(255,255,255,0.07);
+  --border-accent: rgba(211,0,255,0.25);
+  --text-muted: rgba(255,255,255,0.45);
+  --text-secondary: rgba(255,255,255,0.7);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --max-w: 1200px;
+}
+html { scroll-behavior: smooth; }
+body { background: var(--black); color: var(--white); font-family: var(--font-body); font-size: 15px; line-height: 1.5; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+/* BG GLOW EFFECT */
+.bg-glow { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at 50% -20%, rgba(211,0,255,0.1) 0%, transparent 50%), radial-gradient(circle at 10% 80%, rgba(52,227,248,0.04) 0%, transparent 40%); }
+
+/* HEADER */
+header { display: flex; align-items: center; justify-content: space-between; padding: 0 4rem; height: 76px; border-bottom: 1px solid var(--border); background: rgba(7,8,13,0.85); backdrop-filter: blur(24px); position: sticky; top: 0; z-index: 100; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white); font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; }
+.logo-mark { width: 26px; height: 26px; border-radius: 6px; background: var(--grad); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 800; color: #fff; }
+
+.header-right { display: flex; align-items: center; gap: 20px; }
+.back-btn { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; display: flex; align-items: center; gap: 6px; }
+.back-btn:hover { color: var(--white); }
+
+/* User Status Indicator */
+.user-status { display: none; align-items: center; gap: 8px; font-size: 0.8rem; background: rgba(255,255,255,0.04); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
+.status-dot { width: 6px; height: 6px; background: #34E3F8; border-radius: 50%; box-shadow: 0 0 8px #34E3F8; }
+.logout-btn { background: none; border: none; color: #ff5f56; cursor: pointer; text-decoration: underline; font-family: var(--font-body); font-size: 0.8rem; padding: 0; margin-left: 4px; }
+
+/* HERO SECTION */
+.hero { text-align: center; padding: 4rem 2rem 1.5rem; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -0.03em; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* MASTER AI FILE BANNER */
+.master-banner-container { max-width: var(--max-w); margin: 0 auto 2.5rem; padding: 0 2rem; }
+.master-banner { background: linear-gradient(135deg, rgba(211, 0, 255, 0.1) 0%, rgba(52, 227, 248, 0.05) 100%); border: 1px solid rgba(211,0,255,0.25); border-radius: var(--radius-lg); padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+.master-info h2 { font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.25rem; color: var(--white); }
+.master-info p { font-size: 0.85rem; color: var(--text-secondary); }
+.master-btn { background: var(--grad-btn); border: none; padding: 0.75rem 1.5rem; color: #fff; font-weight: 700; font-size: 0.85rem; border-radius: var(--radius); cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; white-space: nowrap; }
+.master-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(211,0,255,0.3); }
+
+/* SEARCH & FILTER CONTROLS */
+.controls-container { max-width: var(--max-w); margin: 0 auto 2.5rem; padding: 0 2rem; }
+.search-bar-wrapper { max-width: 450px; margin: 0 auto 1.5rem; position: relative; }
+.search-input { width: 100%; padding: 0.8rem 1.2rem 0.8rem 2.8rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--white); font-family: var(--font-body); font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.search-input:focus { border-color: var(--p3); }
+.search-icon { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); pointer-events: none; }
+
+.filter-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem; }
+.filter-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.5rem 1.1rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; }
+.filter-btn:hover { border-color: var(--p1); color: var(--white); }
+.filter-btn.active { background: var(--grad); border-color: transparent; color: var(--white); }
+
+/* PATTERN GRID */
+.pattern-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
+  gap: 1.25rem; 
+  max-width: var(--max-w); 
+  margin: 0 auto; 
+  padding: 0 2rem 6rem; 
+}
+
+/* CARD SYSTEM */
+.pattern-card { 
+  background: var(--surface); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius-lg); 
+  overflow: hidden; 
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative; 
+  display: flex; 
+  flex-direction: column; 
+  z-index: 1;
+}
+
+.pattern-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent 20%, var(--p1) 40%, var(--p3) 60%, transparent 80%);
+  animation: rotateGlowBorder 4s linear infinite;
+  z-index: -2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.pattern-card::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: var(--surface);
+  border-radius: calc(var(--radius-lg) - 2px);
+  z-index: -1;
+  transition: background 0.3s ease;
+}
+
+.pattern-card:hover { transform: translateY(-6px); }
+.pattern-card:hover::before { opacity: 1; }
+.pattern-card:hover::after { background: #0f101a; }
+
+.card-preview { 
+  aspect-ratio: 1 / 1; 
+  background: #ffffff; 
+  position: relative; 
+  overflow: hidden; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px; 
+  z-index: 2;
+  border-bottom: 1px solid var(--border);
+  cursor: zoom-in;
+}
+
+.card-preview img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.5s; }
+
+.format-badge { 
+  position: absolute; top: 8px; right: 8px; 
+  background: rgba(7,8,13,0.85); 
+  border: 1px solid rgba(255,255,255,0.15); 
+  color: var(--p3); font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; backdrop-filter: blur(8px); z-index: 3;
+}
+
+.card-details { padding: 1rem; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; z-index: 2; }
+.card-title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; line-height: 1.3; }
+
+.compatibility-modes { margin-bottom: 1rem; }
+.comp-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem; font-weight: 600; }
+.comp-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.comp-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.05); text-transform: uppercase; }
+.comp-tag.active { background: rgba(52, 227, 248, 0.08); color: var(--p3); border-color: rgba(52, 227, 248, 0.2); }
+.comp-tag.inactive { background: rgba(255, 255, 255, 0.02); color: var(--text-muted); opacity: 0.35; text-decoration: line-through; }
+
+.download-btn { 
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 0.6rem; 
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--white); 
+  font-weight: 700; font-size: 0.8rem; text-decoration: none; transition: all 0.25s; cursor: pointer; 
+}
+.download-btn:hover { background: var(--grad); border-color: transparent; box-shadow: 0 4px 15px rgba(211,0,255,0.25); }
+
+/* ZOOM MODAL SYSTEM (NEW) */
+.zoom-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000;
+  display: none; align-items: center; justify-content: center;
+  overflow: hidden; backdrop-filter: blur(10px);
+}
+.zoom-overlay.active { display: flex; }
+.zoom-container {
+  width: 90vw; height: 90vh; display: flex; align-items: center; justify-content: center;
+  cursor: grab; position: relative;
+}
+.zoom-container:active { cursor: grabbing; }
+.zoom-image {
+  max-width: 100%; max-height: 100%; object-fit: contain;
+  transition: transform 0.1s ease-out; transform-origin: center;
+  user-select: none; pointer-events: none;
+}
+.zoom-controls {
+  position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 2001;
+}
+.zoom-close {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: white; width: 44px; height: 44px; border-radius: 50%;
+  font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.zoom-hint {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px;
+  font-size: 0.75rem; color: var(--text-secondary); pointer-events: none;
+}
+
+/* SKELETON */
+.skeleton-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+.skeleton-preview { aspect-ratio: 1/1; background: linear-gradient(90deg, #13141f 25%, #1c1d2d 50%, #13141f 75%); background-size: 200% 100%; animation: loadingShimmer 1.5s infinite; }
+.skeleton-details { padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
+.skeleton-title { height: 16px; width: 70%; background: #1a1b28; border-radius: 4px; }
+.skeleton-comp { height: 26px; width: 100%; background: #1a1b28; border-radius: 4px; }
+.skeleton-btn { height: 32px; width: 100%; background: #1a1b28; border-radius: 6px; }
+
+@keyframes loadingShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes rotateGlowBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* SECURITY MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(7, 8, 13, 0.85); backdrop-filter: blur(12px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-card { background: var(--surface2); border: 1px solid rgba(211,0,255,0.2); border-radius: var(--radius-lg); padding: 2.5rem; width: 100%; max-width: 420px; position: relative; transform: translateY(20px); transition: transform 0.3s ease; }
+.modal-overlay.active .modal-card { transform: translateY(0); }
+.modal-header h3 { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.5rem; text-align: center; }
+.modal-header p { font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-bottom: 1.5rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; font-weight: 600; }
+.form-input { width: 100%; padding: 0.85rem 1.25rem; background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius); color: var(--white); font-family: var(--font-body); outline: none; }
+.submit-btn { width: 100%; padding: 0.9rem; background: var(--grad-btn); border: none; border-radius: var(--radius); color: #fff; font-weight: 700; cursor: pointer; transition: opacity 0.2s; margin-top: 1rem; }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.close-modal { position: absolute; top: 1.25rem; right: 1.25rem; background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+.error-message { color: #ff5f56; font-size: 0.85rem; text-align: center; margin-top: 1rem; display: none; }
+
+footer { background: var(--surface); border-top: 1px solid var(--border); padding: 3rem 4rem; text-align: center; }
+footer p { color: var(--text-muted); font-size: 0.85rem; }
+
+@media (max-width: 768px) {
+  header { padding: 0 2rem; }
+  .pattern-grid { padding: 0 1rem 4rem; }
+  .master-banner { flex-direction: column; text-align: center; padding: 1.5rem; }
+  .master-btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<header>
+  <a href="https://patternflow.fit/" class="logo">
+    <div class="logo-mark">PF</div>
+    PatternFlow Patterns
+  </a>
+  <div class="header-right">
+    <div class="user-status" id="userStatus">
+      <span class="status-dot"></span>
+      <span id="statusUser">Logged In</span>
+      <button class="logout-btn" onclick="clearSavedCredentials()">[Reset]</button>
+    </div>
+    <a href="https://patternflow.fit/" class="back-btn">← Back to Main Tool</a>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Free Sublimation <span class="grad-text">Jersey Patterns</span></h1>
+</section>
+
+<div class="master-banner-container">
+  <div class="master-banner">
+    <div class="master-info">
+      <h2>All-in-One Master AI File</h2>
+      <p>Download a single Adobe Illustrator (.AI) file containing all pattern designs organized inside.</p>
+    </div>
+    <button class="master-btn" onclick="triggerDownload('master_ai')">Download All-in-One .AI File</button>
+  </div>
+</div>
+
+<div class="controls-container">
+  <div class="search-bar-wrapper">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search templates by name...">
+  </div>
+  <div class="filter-group" id="filterGroup">
+    <button class="filter-btn active" data-category="all">All Flows</button>
+    <button class="filter-btn" data-category="flow-1">Flow-1</button>
+    <button class="filter-btn" data-category="flow-2">Flow-2</button>
+    <button class="filter-btn" data-category="custom-flow">Custom-Flow</button>
+  </div>
+</div>
+
+<main class="pattern-grid" id="patternGrid">
+  <div class="skeleton-card"><div class="skeleton-preview"></div><div class="skeleton-details"><div class="skeleton-title"></div><div class="skeleton-comp"></div><div class="skeleton-btn"></div></div></div>
+</main>
+
+<!-- ZOOM MODAL (NEW) -->
+<div class="zoom-overlay" id="zoomOverlay">
+  <div class="zoom-controls">
+    <button class="zoom-close" id="closeZoom">&times;</button>
+  </div>
+  <div class="zoom-container" id="zoomContainer">
+    <img src="" alt="Preview" class="zoom-image" id="zoomImg">
+  </div>
+  <div class="zoom-hint">Scroll to Zoom • Drag to Move</div>
+</div>
+
+<div class="modal-overlay" id="securityModal">
+  <div class="modal-card">
+    <button class="close-modal" id="closeModal">&times;</button>
+    <div class="modal-header">
+      <h3>Access Secured</h3>
+      <p>Please enter your Username and Password to download.</p>
+    </div>
+    <form id="authForm">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="usernameInput" class="form-input" placeholder="Enter username" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="passwordInput" class="form-input" placeholder="Enter password" required>
+      </div>
+      <div class="error-message" id="errorMessage">Invalid Username or Password!</div>
+      <button type="submit" class="submit-btn" id="submitBtn">Verify & Download</button>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <p>© 2024 PatternFlow Resources. All templates are free for print production.</p>
+</footer>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRjpYChsVCju1s3nfmcHZUNy0MpRPtg-KOj7utlfJy4BAArgwwA3EZUfYqQ1H5aiRt/exec";
+  const MASTER_AI_URL = "https://www.dropbox.com/scl/fi/xdrb5w62ut8rkwdrrpm1o/All-FLOW-PATTARN.ai?rlkey=tln5ul9ydrityxq37vjm06nkn&st=rjpi5bu5&dl=1";
+
+  let localDatabase = [];
+  let selectedPatternId = null;
+
+  async function loadPatterns() {
+    const grid = document.getElementById('patternGrid');
+    try {
+      const response = await fetch('./ai/patterns.json');
+      localDatabase = await response.json();
+      grid.innerHTML = '';
+      
+      localDatabase.forEach(p => {
+        const f1 = p.flows.includes('flow-1') ? 'active' : 'inactive';
+        const f2 = p.flows.includes('flow-2') ? 'active' : 'inactive';
+        const cf = p.flows.includes('custom-flow') ? 'active' : 'inactive';
+        const previewSrc = `./ai/${p.folder}/${p.fileName}.${p.imgExt}`;
+
+        const card = document.createElement('div');
+        card.className = 'pattern-card';
+        card.setAttribute('data-flow', p.flows.join(', '));
+        card.innerHTML = `
+          <div class="card-preview" onclick="openZoom('${previewSrc}')">
+            <span class="format-badge">.AI</span>
+            <img src="${previewSrc}" alt="${p.title}" onerror="this.src='https://placehold.co/400x400/13141f/ffffff?text=No+Preview'">
+          </div>
+          <div class="card-details">
+            <div>
+              <h3 class="card-title">${p.title}</h3>
+              <div class="compatibility-modes">
+                <span class="comp-label">Compatible Modes</span>
+                <div class="comp-tags">
+                  <span class="comp-tag ${f1}">Flow-1</span>
+                  <span class="comp-tag ${f2}">Flow-2</span>
+                  <span class="comp-tag ${cf}">Custom-Flow</span>
+                </div>
+              </div>
+            </div>
+            <button class="download-btn" onclick="triggerDownload('${p.id}')">Download</button>
+          </div>`;
+        grid.appendChild(card);
+      });
+      updateUserUIStatus();
+    } catch (e) {
+      grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff5f56;">Failed to load pattern data.</div>`;
+    }
+  }
+
+  // --- ZOOM & PAN LOGIC ---
+  const zoomOverlay = document.getElementById('zoomOverlay');
+  const zoomImg = document.getElementById('zoomImg');
+  const zoomContainer = document.getElementById('zoomContainer');
+  let scale = 1;
+  let isDragging = false;
+  let startX, startY, translateX = 0, translateY = 0;
+
+  function openZoom(src) {
+    zoomImg.src = src;
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+    zoomOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeZoom() {
+    zoomOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function updateTransform() {
+    zoomImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+  }
+
+  zoomContainer.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.2 : 0.2;
+    scale = Math.min(Math.max(1, scale + delta), 5);
+    if (scale === 1) { translateX = 0; translateY = 0; }
+    updateTransform();
+  }, { passive: false });
+
+  zoomContainer.addEventListener('mousedown', (e) => {
+    if (scale <= 1) return;
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+  });
+
+  window.addEventListener('mouseup', () => isDragging = false);
+
+  document.getElementById('closeZoom').onclick = closeZoom;
+  zoomOverlay.onclick = (e) => { if (e.target === zoomOverlay || e.target === zoomContainer) closeZoom(); };
+
+  // ESC key to close
+  window.addEventListener('keydown', (e) => { if(e.key === "Escape") closeZoom(); });
+
+
+  // --- AUTH & DOWNLOAD LOGIC ---
+  const modal = document.getElementById('securityModal');
+  const errorMsg = document.getElementById('errorMessage');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function triggerDownload(id) {
+    selectedPatternId = id;
+    const savedUser = localStorage.getItem('pf_local_user');
+    const savedPass = localStorage.getItem('pf_local_pass');
+    
+    if (savedUser && savedPass) {
+      processVerification(savedUser, savedPass);
+    } else {
+      errorMsg.style.display = 'none';
+      modal.classList.add('active');
+    }
+  }
+
+  async function processVerification(user, pass) {
+    submitBtn.textContent = "Verifying...";
+    submitBtn.disabled = true;
+    errorMsg.style.display = 'none';
+
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: user, password: pass })
+      });
+      const result = await response.json();
+
+      if (result.status === "success") {
+        localStorage.setItem('pf_local_user', user);
+        localStorage.setItem('pf_local_pass', pass);
+        updateUserUIStatus();
+        modal.classList.remove('active');
+
+        if (selectedPatternId === 'master_ai') {
+          window.open(MASTER_AI_URL, '_blank');
+        } else {
+          const pattern = localDatabase.find(p => p.id === selectedPatternId);
+          if (pattern && pattern.dropboxUrl) window.open(pattern.dropboxUrl, '_blank');
+        }
+      } else {
+        errorMsg.textContent = "Invalid Username or Password!";
+        errorMsg.style.display = 'block';
+        clearSavedCredentials();
+      }
+    } catch (e) {
+      errorMsg.textContent = "Connection Error!";
+      errorMsg.style.display = 'block';
+    } finally {
+      submitBtn.textContent = "Verify & Download";
+      submitBtn.disabled = false;
+    }
+  }
+
+  document.getElementById('authForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    processVerification(document.getElementById('usernameInput').value.trim(), document.getElementById('passwordInput').value.trim());
+  });
+
+  document.getElementById('closeModal').onclick = () => modal.classList.remove('active');
+
+  function filterItems() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const activeCat = document.querySelector('.filter-btn.active').dataset.category;
+    document.querySelectorAll('.pattern-card').forEach(card => {
+      const title = card.querySelector('.card-title').textContent.toLowerCase();
+      const flows = card.getAttribute('data-flow').toLowerCase();
+      const matchSearch = title.includes(search);
+      const matchCat = activeCat === 'all' || flows.includes(activeCat);
+      card.style.display = (matchSearch && matchCat) ? 'flex' : 'none';
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', filterItems);
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterItems();
+    });
+  });
+
+  function updateUserUIStatus() {
+    const user = localStorage.getItem('pf_local_user');
+    const statusDiv = document.getElementById('userStatus');
+    if (user) {
+      document.getElementById('statusUser').textContent = `User: ${user}`;
+      statusDiv.style.display = 'inline-flex';
+    } else {
+      statusDiv.style.display = 'none';
+    }
+  }
+
+  function clearSavedCredentials() {
+    localStorage.removeItem('pf_local_user');
+    localStorage.removeItem('pf_local_pass');
+    updateUserUIStatus();
+  }
+
+  window.addEventListener('DOMContentLoaded', loadPatterns);
+</script>
+</body>
+</html>

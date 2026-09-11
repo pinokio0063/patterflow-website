@@ -37,7 +37,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [1/5] GitHub e push...
+echo [1/6] GitHub e push...
 git push origin main
 if errorlevel 1 (
   echo Push fail hoise.
@@ -46,23 +46,28 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/5] Deploy use.patternflow.fit ...
+echo [2/6] Deploy use.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.use.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [3/5] Deploy price.patternflow.fit ...
+echo [3/6] Deploy price.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.price.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [4/5] Deploy layouts.patternflow.fit ...
+echo [4/6] Deploy layouts.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.layouts.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
-echo [5/5] Deploy sheet.patternflow.fit ...
+echo [5/6] Deploy sheet.patternflow.fit ...
 call npx --yes wrangler deploy --config wrangler.sheet.jsonc
+if errorlevel 1 goto :deployfail
+
+echo.
+echo [6/6] Deploy library.patternflow.fit ...
+call npx --yes wrangler deploy --config wrangler.library.jsonc
 if errorlevel 1 goto :deployfail
 
 echo.
@@ -74,6 +79,7 @@ echo How-to:  https://use.patternflow.fit/
 echo Price:   https://price.patternflow.fit/
 echo Layouts: https://layouts.patternflow.fit/
 echo Sheet:   https://sheet.patternflow.fit/
+echo Library: https://library.patternflow.fit/
 echo.
 pause
 exit /b 0
