@@ -340,7 +340,7 @@ footer p { color: var(--text-muted); font-size: 0.85rem; }
         const f1 = p.flows.includes('flow-1') ? 'active' : 'inactive';
         const f2 = p.flows.includes('flow-2') ? 'active' : 'inactive';
         const cf = p.flows.includes('custom-flow') ? 'active' : 'inactive';
-        const previewSrc = `./ai/${p.folder}/${p.fileName}.${p.imgExt}`;
+        const previewSrc = `./ai/${String(p.folder).toLowerCase()}/${String(p.fileName).toLowerCase()}.${p.imgExt}`;
 
         const card = document.createElement('div');
         card.className = 'pattern-card';
