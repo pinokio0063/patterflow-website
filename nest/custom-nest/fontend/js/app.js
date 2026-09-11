@@ -239,7 +239,7 @@
             minGap: parseFloat($('inpGap').value),
             rowsPerDoc: parseInt($('inpRows').value, 10) || 4,
             sleeveKey: $('sleeveKey').value === 'without_rib' ? 'short_slv_without_rib' : 'short_slv_with_rib',
-            devTrials: !($('devTrialsOn') && !$('devTrialsOn').checked),
+            devTrials: false,
             job: collectJob(),
             chart: window.PF_CHART || {},
             masters: {
@@ -268,7 +268,6 @@
             lastResult = result;
             if (window.CustomNest) window.CustomNest._lastResult = result;
             pageFilter = 0;
-            if (window.DevTrials) window.DevTrials.attach(result);
             renderTabs();
             renderStats();
             paint(true);
@@ -298,31 +297,24 @@
     function renderTabs() {
         var tabs = $('tabs');
         tabs.innerHTML = '';
-        var recorded = window.DevTrials && window.DevTrials.showingRecorded();
-        function add(label, val, isRec) {
+        function add(label, val) {
             var b = document.createElement('button');
-            b.className = 'tab' + ((isRec && recorded) || (!isRec && !recorded && pageFilter === val) ? ' on' : '');
+            b.className = 'tab' + (pageFilter === val ? ' on' : '');
             b.type = 'button';
             b.textContent = label;
             b.addEventListener('click', function () {
-                if (isRec) {
-                    if (!recorded && $('devTrialCount')) $('devTrialCount').click();
-                    return;
-                }
-                if (recorded && $('devTrialCount')) $('devTrialCount').click();
                 pageFilter = val;
                 renderTabs();
                 paint(true);
             });
             tabs.appendChild(b);
         }
-        add('ALL DOCS', 0, false);
+        add('ALL DOCS', 0);
         if (lastResult && lastResult.pages) {
             lastResult.pages.forEach(function (p) {
-                add('DOC ' + p.index, p.index, false);
+                add('DOC ' + p.index, p.index);
             });
         }
-        if (lastResult && lastResult.devTrialCount) add('RECORDED', -1, true);
     }
 
     function renderStats() {
@@ -349,11 +341,7 @@
     }
 
     function paint(resetFit) {
-        if (window.DevTrials && window.DevTrials.showingRecorded()) {
-            lastSvg = window.DevTrials.buildSerialSvg(lastResult);
-        } else {
-            lastSvg = CN.render.buildSvg(lastResult, pageFilter);
-        }
+        lastSvg = CN.render.buildSvg(lastResult, pageFilter);
         $('stageWorld').innerHTML = lastSvg;
         var svg = $('stageWorld').querySelector('svg');
         if (svg) {
@@ -386,18 +374,35 @@
         panX = 24;
         panY = 24;
         applyTransform();
+        updateZoomButtons();
+    }
+
+    function minZoom() {
+        var floor = fitZoom > 0 ? fitZoom : 0.05;
+        return floor;
+    }
+
+    function updateZoomButtons() {
+        var out = $('btnZoomOut');
+        if (out) out.disabled = zoom <= minZoom() + 0.0001;
     }
 
     function zoomBy(factor, cx, cy) {
         var next = zoom * factor;
-        if (next < 0.05) next = 0.05;
+        var floor = minZoom();
+        if (next < floor) next = floor;
         if (next > 16) next = 16;
+        if (next === zoom) {
+            updateZoomButtons();
+            return;
+        }
         if (cx != null) {
             panX = cx - (cx - panX) * (next / zoom);
             panY = cy - (cy - panY) * (next / zoom);
         }
         zoom = next;
         applyTransform();
+        updateZoomButtons();
     }
 
     function downloadJson() {
@@ -511,7 +516,6 @@
                 paint(!!resetFit);
             };
         }
-        if (window.DevTrials) window.DevTrials.bind();
         renderJob();
         renderTabs();
         fetch(apiUrl('/engine')).then(function (r) { return r.text(); }).then(function (text) {

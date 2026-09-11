@@ -11,7 +11,7 @@
     <aside class="side">
         <div class="brand">
             <h1>CUSTOM NEST PREVIEW</h1>
-            <p>C++ nest engine · true-shape · 4 body rows / document · <a href="NESTING_LOGIC.html" style="color:#9ad0ff">নেস্টিং লজিক</a> · <a href="FULL-SLVE/" style="color:#ffab91">ফুল ৪-রো ল্যাব</a></p>
+            <p>C++ nest engine · true-shape · 4 body rows / document</p>
         </div>
         <div class="scroll">
             <div class="block">
@@ -106,16 +106,6 @@
                 <button class="btn go" id="btnSim" type="button">SIMULATE</button>
                 <div class="sim-time" id="simTime">C++ engine · idle</div>
             </div>
-
-            <!-- DEV ONLY: remove this block + js/dev-trials.js for public -->
-            <div class="block dev-block" id="devTrials">
-                <h2>DEV · trial recorder</h2>
-                <p class="dev-note">Logic debug only. Public cut: uncheck, or set PF_DEV_TRIALS 0 and delete this panel.</p>
-                <label class="dev-check"><input id="devTrialsOn" type="checkbox" checked /> Record trials (on)</label>
-                <button class="dev-recorded" id="devTrialCount" type="button">none</button>
-                <div class="dev-label" id="devTrialLabel">ফাইনাল নেস্ট শুধু। recorded = আলাদা DOC কার্ড + রঙিন ট্রাই (সবুজ/কমলা/লাল)।</div>
-                <div class="dev-legend"><span class="sit">sit</span> <span class="fail">fail</span> <span class="ovl">overlay</span></div>
-            </div>
         </div>
     </aside>
 
@@ -140,13 +130,9 @@
                 <span><i class="s"></i>SLEEVE</span>
                 <span><i class="r"></i>OVERLAY</span>
             </div>
-            <div class="hint">Wheel = zoom · Drag = pan · SVG units = inches</div>
+            <div class="hint">Wheel = zoom · Drag = pan · zoom out stops at Fit</div>
         </div>
     </main>
-
-    <aside class="rules-rail" aria-label="Locked nest logic">
-        <div class="rules-scroll" id="lockedRules"></div>
-    </aside>
 </div>
 
 <script src="js/config.js"></script>
@@ -156,8 +142,6 @@
 <script src="js/geom.js"></script>
 <script src="js/packer.js"></script>
 <script src="js/render.js"></script>
-<script src="js/dev-trials.js"></script>
-<script src="js/locked-rules.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
