@@ -39,8 +39,8 @@ The website cannot run `.exe` on Cloudflare. The owner PC stays on 24h and serve
 
 | Public URL | Local |
 |---|---|
-| https://nest-api.patternflow.fit | `127.0.0.1:8765` Custom `nest.exe` |
-| https://nesting-api.patternflow.fit | `127.0.0.1:8766` Sparrow `temp.exe` |
+| https://nest-api.patternflow.fit | `127.0.0.1:9785` Custom `nest.exe` |
+| https://nesting-api.patternflow.fit | `127.0.0.1:9786` Sparrow `temp.exe` |
 
 APIs are JSON-only (`POST /simulate`, `GET /health`). They do not serve the exe files.
 

@@ -215,26 +215,43 @@
     }
 
     function emptyRow() {
-        return { NAME: '', NUMBER: String(jobRows.length + 1), SIZE: 'M', SLV: 'HAF', COMMENTS: '' };
+        return { NAME: '', NUMBER: '', SIZE: 'M', QTY: 0, SLV: 'HAF', COMMENTS: '' };
+    }
+
+    function defaultJobRows() {
+        var starter = { M: 2, L: 2, XL: 2 };
+        return CN.chart.sizeKeys().map(function (size) {
+            return { NAME: '', NUMBER: '', SIZE: size, QTY: starter[size] || 0, SLV: 'HAF', COMMENTS: '' };
+        });
+    }
+
+    function rowQty(row) {
+        var n = parseInt(row.QTY, 10);
+        return isNaN(n) || n < 0 ? 0 : n;
     }
 
     function renderJob() {
         var tb = $('jobBody');
         tb.innerHTML = '';
-        jobRows.forEach(function (row, idx) {
-            var tr = document.createElement('tr');
+        jobRows.forEach(function (row) {
+            var tr = document.createElement('div');
+            tr.className = 'job-row';
             tr.innerHTML =
-                '<td>' + (idx + 1) + '</td>' +
-                '<td><input data-k="NAME" value="' + escapeAttr(row.NAME) + '" /></td>' +
-                '<td><input data-k="NUMBER" value="' + escapeAttr(row.NUMBER) + '" /></td>' +
-                '<td><select data-k="SIZE">' + sizeOptions(row.SIZE) + '</select></td>' +
-                '<td><select data-k="SLV">' +
+                '<span class="size-cell">' + escapeAttr(row.SIZE) + '</span>' +
+                '<input data-k="QTY" type="number" min="0" step="1" value="' + rowQty(row) + '" />' +
+                '<select data-k="SLV">' +
                     '<option value="HAF"' + (row.SLV === 'HAF' ? ' selected' : '') + '>HAF</option>' +
                     '<option value="FULL"' + (row.SLV === 'FULL' ? ' selected' : '') + '>FULL</option>' +
-                '</select></td>';
+                '</select>';
             Array.prototype.forEach.call(tr.querySelectorAll('input,select'), function (el) {
                 el.addEventListener('change', function () {
                     row[el.getAttribute('data-k')] = el.value;
+                    if (el.getAttribute('data-k') === 'QTY') row.QTY = rowQty(row);
+                    renderChips();
+                });
+                el.addEventListener('input', function () {
+                    if (el.getAttribute('data-k') !== 'QTY') return;
+                    row.QTY = rowQty({ QTY: el.value });
                     renderChips();
                 });
             });
@@ -243,44 +260,38 @@
         renderChips();
     }
 
-    function sizeOptions(cur) {
-        return CN.chart.sizeKeys().map(function (k) {
-            return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>' + k + '</option>';
-        }).join('');
-    }
-
     function escapeAttr(s) {
         return String(s || '').replace(/"/g, '&quot;');
     }
 
     function renderChips() {
-        var parsed = CN.chart.parseJob(jobRows);
-        var mix = {}, keys = [];
-        parsed.rows.forEach(function (r) {
-            var k = r.SIZE + ' ' + r.SLV;
-            if (!mix[k]) { mix[k] = 0; keys.push(k); }
-            mix[k] += 1;
+        var keys = [];
+        jobRows.forEach(function (r) {
+            var q = rowQty(r);
+            if (q <= 0) return;
+            keys.push({ k: r.SIZE + ' ' + r.SLV, q: q });
         });
-        $('chips').innerHTML = keys.map(function (k) {
-            return '<span class="chip">' + k + ' <b>×' + mix[k] + '</b></span>';
-        }).join('') || '<span class="chip">no job rows</span>';
-        var msg = [];
-        if (parsed.skipped) msg.push(parsed.skipped + ' row(s) ignored');
-        $('jobWarn').textContent = msg.join(' · ');
+        $('chips').innerHTML = keys.map(function (it) {
+            return '<span class="chip">' + it.k + ' <b>×' + it.q + '</b></span>';
+        }).join('');
+        $('jobWarn').textContent = '';
     }
 
     function loadJobList(list) {
-        jobRows = (list || []).map(function (it) {
-            var row = {
-                NAME: String(it.NAME || ''),
-                NUMBER: String(it.NUMBER || ''),
-                SIZE: CN.chart.normalizeSize(it.SIZE) || 'M',
-                SLV: CN.chart.normalizeSlv(it.SLV) || 'HAF',
-                COMMENTS: String(it.COMMENTS != null ? it.COMMENTS : (it.COMMENT || ''))
-            };
-            Object.keys(it).forEach(function (k) {
-                if (/^CUST-/i.test(k)) row[String(k).toUpperCase()] = String(it[k] != null ? it[k] : '');
-            });
+        var bySize = {};
+        (list || []).forEach(function (it) {
+            var size = CN.chart.normalizeSize(it.SIZE);
+            var slv = CN.chart.normalizeSlv(it.SLV) || 'HAF';
+            if (!size) return;
+            if (!bySize[size]) bySize[size] = { SIZE: size, QTY: 0, SLV: slv };
+            bySize[size].QTY += 1;
+            bySize[size].SLV = slv;
+        });
+        jobRows = defaultJobRows().map(function (row) {
+            if (bySize[row.SIZE]) {
+                row.QTY = bySize[row.SIZE].QTY;
+                row.SLV = bySize[row.SIZE].SLV;
+            }
             return row;
         });
         if (!jobRows.length) jobRows.push(emptyRow());
@@ -288,19 +299,21 @@
     }
 
     function collectJob() {
-        return jobRows.map(function (r) {
-            var o = {
-                NAME: r.NAME,
-                NUMBER: r.NUMBER,
-                SIZE: r.SIZE,
-                SLV: r.SLV,
-                COMMENTS: r.COMMENTS || ''
-            };
-            Object.keys(r).forEach(function (k) {
-                if (/^CUST-/i.test(k)) o[k] = r[k];
-            });
-            return o;
+        var out = [];
+        jobRows.forEach(function (r) {
+            var q = rowQty(r);
+            var i;
+            for (i = 0; i < q; i++) {
+                out.push({
+                    NAME: r.SIZE,
+                    NUMBER: String(i + 1),
+                    SIZE: r.SIZE,
+                    SLV: r.SLV,
+                    COMMENTS: r.COMMENTS || ''
+                });
+            }
         });
+        return out;
     }
 
     function outlinePayload(master) {
@@ -308,6 +321,49 @@
         return {
             points: master.outline.points.map(function (p) { return { x: p.x, y: p.y }; })
         };
+    }
+
+    function nestTimeLimit() {
+        var el = $('inpTime');
+        var n = el ? parseInt(el.value, 10) : NaN;
+        if (isNaN(n)) n = Number(window.PF_NESTING_TIME_SEC) || 20;
+        if (n < 5) n = 5;
+        if (n > 90) n = 90;
+        if (el) el.value = n;
+        return n;
+    }
+
+    function syncNestTimeLabel() {
+        var el = $('nestTimeLabel');
+        if (el) el.textContent = String(nestTimeLimit());
+    }
+
+    function setCountdown(sec) {
+        var text = (Math.max(0, Number(sec) || 0)).toFixed(1);
+        var a = $('emptyNesting');
+        var b = $('emptyCustom');
+        if (a) a.textContent = text;
+        if (b) b.textContent = text;
+    }
+
+    function showEmptyFrames(on) {
+        var a = $('emptyNesting');
+        var b = $('emptyCustom');
+        if (a) a.style.display = on ? 'flex' : 'none';
+        if (b) b.style.display = on ? 'flex' : 'none';
+    }
+
+    function resetZoom100() {
+        zoom = 1;
+        panX = 20;
+        panY = 20;
+        fitZoom = 1;
+        nestZoom = 1;
+        nestPanX = 20;
+        nestPanY = 20;
+        nestFitZoom = 1;
+        applyTransform();
+        applyNestTransform();
     }
 
     function setSimTime(text) {
@@ -337,19 +393,35 @@
             alert('Load FRONT and BACK SVG first.');
             return;
         }
+        if (!collectJob().length) {
+            alert('Set piece quantity above 0.');
+            return;
+        }
         btn.disabled = true;
-        btn.textContent = 'SIMULATING…';
+        btn.textContent = 'START';
         var t0 = Date.now();
-        setSimTime('calculating… 0.0 s');
+        var limit = nestTimeLimit();
+        lastResult = null;
+        lastNesting = null;
+        lastSvg = '';
+        lastNestSvg = '';
+        $('stageWorld').innerHTML = '';
+        if ($('stageNesting')) $('stageNesting').innerHTML = '';
+        resetZoom100();
+        showEmptyFrames(true);
+        setCountdown(limit);
+        setSimTime('calculating… ' + limit.toFixed(1) + ' s');
         var tick = setInterval(function () {
-            setSimTime('calculating… ' + ((Date.now() - t0) / 1000).toFixed(1) + ' s');
+            var left = Math.max(0, limit - (Date.now() - t0) / 1000);
+            setCountdown(left);
+            setSimTime('calculating… ' + left.toFixed(1) + ' s');
         }, 100);
         var payload = {
             dia: parseFloat($('inpDia').value),
             minGap: parseFloat($('inpGap').value),
             rowsPerDoc: parseInt($('inpRows').value, 10) || 4,
             sleeveKey: $('sleeveKey').value === 'without_rib' ? 'short_slv_without_rib' : 'short_slv_with_rib',
-            timeSec: window.PF_NESTING_TIME_SEC || 30,
+            timeSec: limit,
             devTrials: false,
             job: collectJob(),
             chart: window.PF_CHART || {},
@@ -373,14 +445,12 @@
                 lastResult = custom;
                 if (window.CustomNest) window.CustomNest._lastResult = custom;
                 pageFilter = 0;
-                renderTabs();
                 paint(true);
             }
             lastNesting = nesting;
             paintNesting(true);
             renderStats();
             renderNestingStats();
-            renderCompare();
             var sec = (Date.now() - t0) / 1000;
             if ((!custom || custom.pending) && (!nesting || nesting.pending)) {
                 setSimTime('preview only · backends not connected');
@@ -390,71 +460,29 @@
         }).then(function () {
             clearInterval(tick);
             btn.disabled = false;
-            btn.textContent = 'SIMULATE';
+            btn.textContent = 'START';
         });
     }
 
-    function renderTabs() {
-        var tabs = $('tabs');
-        tabs.innerHTML = '';
-        function add(label, val) {
-            var b = document.createElement('button');
-            b.className = 'tab' + (pageFilter === val ? ' on' : '');
-            b.type = 'button';
-            b.textContent = label;
-            b.addEventListener('click', function () {
-                pageFilter = val;
-                renderTabs();
-                paint(true);
-            });
-            tabs.appendChild(b);
-        }
-        add('ALL DOCS', 0);
-        if (lastResult && lastResult.pages) {
-            lastResult.pages.forEach(function (p) {
-                add('DOC ' + p.index, p.index);
-            });
-        }
-    }
-
     function renderStats() {
-        if (!lastResult) { $('stats').textContent = 'Waiting for backend'; return; }
+        if (!lastResult) { $('stats').innerHTML = 'fabric <b>—</b>'; return; }
         if (lastResult.pending) { $('stats').textContent = 'Backend not connected'; return; }
-        if (!lastResult.ok) { $('stats').textContent = lastResult.error || 'Custom failed'; return; }
+        if (!lastResult.ok) { $('stats').textContent = lastResult.error || 'Cutting Friendly failed'; return; }
         var r = lastResult;
         var extra = '';
         if (r.overlapCount) {
             extra = ' · <b style="color:#ff6b6b">' + r.overlapCount + ' overlay</b>';
         }
-        var sec = (r.elapsedMs || 0) / 1000;
-        var timeLabel = sec < 10 ? sec.toFixed(2) + ' s' : sec.toFixed(1) + ' s';
-        $('stats').innerHTML =
-            'fabric <b>' + fmtMeters(r.fabricMeters) + '</b> · <b>' + (r.pages ? r.pages.length : 0) + '</b> docs · ' +
-            'calc <b class="calc-time">' + timeLabel + '</b>' + extra;
+        $('stats').innerHTML = 'fabric <b>' + fmtMeters(r.fabricMeters) + '</b>' + extra;
     }
 
     function renderNestingStats() {
         var el = $('statsNesting');
         if (!el) return;
-        if (!lastNesting) { el.textContent = 'Waiting for backend'; return; }
+        if (!lastNesting) { el.innerHTML = 'fabric <b>—</b>'; return; }
         if (lastNesting.pending) { el.textContent = 'Backend not connected'; return; }
         if (!lastNesting.ok) { el.textContent = lastNesting.error || 'Nesting failed'; return; }
         el.innerHTML = 'fabric <b>' + fmtMeters(lastNesting.fabricMeters) + '</b>';
-    }
-
-    function renderCompare() {
-        var el = $('compareStrip');
-        if (!el) return;
-        var n = lastNesting && lastNesting.ok ? lastNesting.fabricMeters : null;
-        var c = lastResult && lastResult.ok ? lastResult.fabricMeters : null;
-        var html = 'Fabric height · Nesting <b>' + fmtMeters(n) + '</b> · Custom <b>' + fmtMeters(c) + '</b>';
-        if (n != null && c != null && isFinite(n) && isFinite(c)) {
-            var d = n - c;
-            if (Math.abs(d) < 0.0005) html += ' · <span class="better">same</span>';
-            else if (d > 0) html += ' · <span class="better">Custom shorter by ' + Math.abs(d).toFixed(3) + ' m</span>';
-            else html += ' · <span class="better">Nesting shorter by ' + Math.abs(d).toFixed(3) + ' m</span>';
-        }
-        el.innerHTML = html;
     }
 
     function applyTransform() {
@@ -463,6 +491,15 @@
     }
 
     function paint(resetFit) {
+        var empty = $('emptyCustom');
+        if (!lastResult || !lastResult.ok) {
+            lastSvg = '';
+            $('stageWorld').innerHTML = '';
+            if (empty) empty.style.display = 'flex';
+            applyTransform();
+            return;
+        }
+        if (empty) empty.style.display = 'none';
         lastSvg = CN.render.buildSvg(lastResult, pageFilter);
         $('stageWorld').innerHTML = lastSvg;
         var svg = $('stageWorld').querySelector('svg');
@@ -544,6 +581,10 @@
         lastNestSvg = svg;
         world.innerHTML = svg;
         if (empty) empty.style.display = svg ? 'none' : 'flex';
+        if (!svg) {
+            applyNestTransform();
+            return;
+        }
         var node = world.querySelector('svg');
         if (node) {
             var vb = (node.getAttribute('viewBox') || '0 0 63 20').split(/\s+/);
@@ -594,73 +635,35 @@
         applyNestTransform();
     }
 
-    function downloadJson() {
-        if (!lastResult) {
-            alert('Simulate first.');
-            return;
-        }
-        var payload = {
-            ok: lastResult.ok,
-            dia: lastResult.dia,
-            minGap: lastResult.minGap,
-            fabricInches: lastResult.fabricInches,
-            fabricMeters: lastResult.fabricMeters,
-            sleeveKey: lastResult.sleeveKey,
-            docs: lastResult.docs || []
-        };
-        var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'patternflow-nest.json';
-        a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-    }
-
-    function downloadSvg() {
-        if (!lastResult) {
-            alert('Simulate first.');
-            return;
-        }
-        var svg = CN.render.buildSvg(lastResult, pageFilter);
-        var name = 'patternflow-nest';
-        if (pageFilter > 0) name += '-doc' + pageFilter;
-        name += '.svg';
-        var blob = new Blob([svg], { type: 'image/svg+xml' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
-    }
-
     function init() {
         fillSleeveSelect();
         loadPatternCatalog();
-        $('btnAddRow').addEventListener('click', function () {
-            jobRows.push(emptyRow());
-            renderJob();
-        });
-        $('btnLoadJob').addEventListener('click', function () { $('fileJob').click(); });
-        $('fileJob').addEventListener('change', function () {
-            var f = $('fileJob').files && $('fileJob').files[0];
-            if (!f) return;
-            var reader = new FileReader();
-            reader.onload = function () {
-                try { loadJobList(JSON.parse(reader.result)); }
-                catch (e) { alert('Invalid JSON'); }
-            };
-            reader.readAsText(f);
-        });
-        $('btnDemoJob').addEventListener('click', function () {
-            fetch('samples/demo-job.json').then(function (r) { return r.json(); }).then(loadJobList)
-                .catch(function () { alert('Open via start.bat to load the sample job, or use Load JSON.'); });
-        });
+        var gear = $('btnSettings');
+        var pop = $('settingsPop');
+        if (gear && pop) {
+            gear.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = pop.hasAttribute('hidden');
+                if (open) pop.removeAttribute('hidden');
+                else pop.setAttribute('hidden', '');
+                gear.classList.toggle('on', open);
+            });
+            document.addEventListener('click', function (e) {
+                if (pop.hasAttribute('hidden')) return;
+                if (pop.contains(e.target) || gear.contains(e.target)) return;
+                pop.setAttribute('hidden', '');
+                gear.classList.remove('on');
+            });
+        }
         $('btnSim').addEventListener('click', simulate);
+        if ($('inpTime')) {
+            $('inpTime').addEventListener('change', syncNestTimeLabel);
+            $('inpTime').addEventListener('input', syncNestTimeLabel);
+            syncNestTimeLabel();
+        }
         $('btnZoomIn').addEventListener('click', function () { zoomBy(1.25); });
         $('btnZoomOut').addEventListener('click', function () { zoomBy(1 / 1.25); });
         $('btnZoomFit').addEventListener('click', zoomFit);
-        $('btnDownloadSvg').addEventListener('click', downloadSvg);
-        $('btnDownloadJson').addEventListener('click', downloadJson);
         if ($('btnNestZoomIn')) $('btnNestZoomIn').addEventListener('click', function () { nestZoomBy(1.25); });
         if ($('btnNestZoomOut')) $('btnNestZoomOut').addEventListener('click', function () { nestZoomBy(1 / 1.25); });
         if ($('btnNestZoomFit')) $('btnNestZoomFit').addEventListener('click', nestZoomFit);
@@ -720,21 +723,18 @@
             if (lastNestSvg) nestZoomFit();
         });
 
-        jobRows = [
-            { NAME: 'T1', NUMBER: '1', SIZE: 'L', SLV: 'HAF' },
-            { NAME: 'T2', NUMBER: '2', SIZE: 'L', SLV: 'HAF' },
-            { NAME: 'T3', NUMBER: '1', SIZE: 'M', SLV: 'HAF' }
-        ];
+        jobRows = defaultJobRows();
         if (window.CustomNest) {
             window.CustomNest._repaint = function (resetFit) {
-                renderTabs();
                 paint(!!resetFit);
             };
         }
         renderJob();
-        renderTabs();
-        renderCompare();
-        paintNesting(true);
+        setCountdown(nestTimeLimit());
+        showEmptyFrames(true);
+        resetZoom100();
+        paint(false);
+        paintNesting(false);
         fetch(apiUrl('/engine')).then(function (r) { return r.text(); }).then(function (text) {
             if (!text || text.charAt(0) === '<') throw new Error('html');
             var info = JSON.parse(text);
@@ -742,7 +742,6 @@
         }).catch(function () {
             setSimTime(window.PF_NEST_API ? 'backend offline' : 'preview only · backend not connected');
         });
-        paint(true);
     }
 
     init();

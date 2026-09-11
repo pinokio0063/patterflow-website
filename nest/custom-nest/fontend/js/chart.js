@@ -6,7 +6,10 @@
 
     var CN = global.CustomNest = global.CustomNest || {};
 
+    /* Physical rank (small → large). Do not reorder — nest logic uses sizeIndex. */
     var SIZE_ORDER = ['2Y', '4Y', '6Y', '8Y', '10Y', '12Y', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
+    /* Job list display: adult first, then youth. */
+    var LIST_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL', '2Y', '4Y', '6Y', '8Y', '10Y', '12Y'];
 
     var SLV_KEYS = [
         { id: 'short_slv_without_rib', label: 'Short sleeve — without rib' },
@@ -25,7 +28,7 @@
     }
 
     function sizeKeys() {
-        return SIZE_ORDER.filter(function (k) {
+        return LIST_ORDER.filter(function (k) {
             return chart()[k] && chart()[k].FONT_BACK;
         });
     }
@@ -109,6 +112,7 @@
 
     CN.chart = {
         SIZE_ORDER: SIZE_ORDER,
+        LIST_ORDER: LIST_ORDER,
         SLV_KEYS: SLV_KEYS,
         RIB_KEYS: RIB_KEYS,
         sizeKeys: sizeKeys,

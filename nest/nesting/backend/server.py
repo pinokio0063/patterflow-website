@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -19,13 +20,15 @@ OUTPUT_DIR = os.path.join(RUNTIME, "output")
 INPUT_PATH = os.path.join(RUNTIME, "input.json")
 OUTPUT_SVG = os.path.join(OUTPUT_DIR, "final_patternflow_nest.svg")
 OUTPUT_JSON = os.path.join(OUTPUT_DIR, "final_patternflow_nest.json")
-PORT = int(os.environ.get("PF_NESTING_PORT", "8766"))
+PORT = int(os.environ.get("PF_NESTING_PORT", "9786"))
 HOST = os.environ.get("PF_NESTING_HOST", "127.0.0.1")
 PT_PER_IN = 72.0
 IN_TO_M = 0.0254
 # Browser/Cloudflare wait ~100s; keep engine under that.
 MAX_TIME_SEC = 90
 IO_OVERHEAD_SEC = 4
+# temp.exe uses one shared runtime folder — one job at a time.
+JOB_LOCK = threading.Lock()
 
 
 def normalize_size(raw):
@@ -299,18 +302,27 @@ class Handler(BaseHTTPRequestHandler):
         cli_time = max(3, time_sec - IO_OVERHEAD_SEC)
         http_limit = time_sec + 20
         try:
-            os.makedirs(OUTPUT_DIR, exist_ok=True)
-            with open(INPUT_PATH, "w", encoding="utf-8") as fh:
-                json.dump(sparrow, fh)
-            for path in (OUTPUT_SVG, OUTPUT_JSON):
-                if os.path.isfile(path):
-                    os.remove(path)
-            proc = subprocess.run(
-                [ENGINE, "-i", INPUT_PATH, "-t", str(cli_time), "-x"],
-                cwd=RUNTIME,
-                capture_output=True,
-                timeout=http_limit,
-            )
+            with JOB_LOCK:
+                os.makedirs(OUTPUT_DIR, exist_ok=True)
+                with open(INPUT_PATH, "w", encoding="utf-8") as fh:
+                    json.dump(sparrow, fh)
+                for path in (OUTPUT_SVG, OUTPUT_JSON):
+                    if os.path.isfile(path):
+                        os.remove(path)
+                proc = subprocess.run(
+                    [ENGINE, "-i", INPUT_PATH, "-t", str(cli_time), "-x"],
+                    cwd=RUNTIME,
+                    capture_output=True,
+                    timeout=http_limit,
+                )
+                if not os.path.isfile(OUTPUT_SVG):
+                    elapsed = int((time.time() - t0) * 1000)
+                    err = (proc.stderr or proc.stdout or b"").decode("utf-8", "replace").strip()
+                    hint = err.splitlines()[-1] if err else ("exit %s" % proc.returncode)
+                    self._json(500, fail_payload("temp.exe produced no SVG (%s)" % hint, elapsed))
+                    return
+                with open(OUTPUT_SVG, "r", encoding="utf-8") as fh:
+                    svg_raw = fh.read()
         except subprocess.TimeoutExpired:
             elapsed = int((time.time() - t0) * 1000)
             self._json(504, fail_payload("Sparrow nest timed out (%ss)." % time_sec, elapsed))
@@ -319,17 +331,6 @@ class Handler(BaseHTTPRequestHandler):
             self._json(500, fail_payload("Could not start temp.exe: %s" % e))
             return
         elapsed = int((time.time() - t0) * 1000)
-        if not os.path.isfile(OUTPUT_SVG):
-            err = (proc.stderr or proc.stdout or b"").decode("utf-8", "replace").strip()
-            hint = err.splitlines()[-1] if err else ("exit %s" % proc.returncode)
-            self._json(500, fail_payload("temp.exe produced no SVG (%s)" % hint, elapsed))
-            return
-        try:
-            with open(OUTPUT_SVG, "r", encoding="utf-8") as fh:
-                svg_raw = fh.read()
-        except OSError as e:
-            self._json(500, fail_payload("Could not read SVG: %s" % e, elapsed))
-            return
         meters = fabric_meters(svg_raw)
         self._json(200, {
             "ok": True,

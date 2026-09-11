@@ -9,98 +9,82 @@
 <body>
 <div class="app">
     <aside class="side">
-        <div class="brand">
-            <h1>NEST COMPARE</h1>
-            <p>Same input · Nesting (top) vs Custom (bottom) · fabric height</p>
+        <div class="side-top">
+            <button class="btn go" id="btnSim" type="button">START</button>
         </div>
         <div class="scroll">
             <div class="block">
-                <h2>Setup</h2>
-                <div class="grid2">
-                    <div class="field">
-                        <label>DIA (inches)</label>
-                        <input id="inpDia" type="number" step="0.01" min="10" value="63" />
-                    </div>
-                    <div class="field">
-                        <label>Min gap (inches)</label>
-                        <input id="inpGap" type="number" step="0.01" min="0" value="0.05" />
-                    </div>
-                    <div class="field">
-                        <label>Body rows / document</label>
-                        <input id="inpRows" type="number" step="1" min="1" value="4" />
-                    </div>
-                    <div class="field">
-                        <label>Rib (short + long)</label>
-                        <select id="sleeveKey"></select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="block">
                 <h2>Data list · SIZE + SLV</h2>
-                <div class="job-tools">
-                    <button class="btn" id="btnLoadJob" type="button">Load JSON</button>
-                    <button class="btn ghost" id="btnDemoJob" type="button">Sample job</button>
-                    <button class="btn ghost" id="btnAddRow" type="button">+ Row</button>
-                    <input type="file" id="fileJob" accept=".json,application/json" hidden />
+                <div class="job-list">
+                    <div class="job-head">
+                        <span>SIZE</span>
+                        <span>PCS</span>
+                        <span>SLV</span>
+                    </div>
+                    <div id="jobBody"></div>
                 </div>
                 <div class="chips" id="chips"></div>
-                <table class="job">
-                    <thead>
-                        <tr><th>#</th><th>NAME</th><th>NO</th><th>SIZE</th><th>SLV</th></tr>
-                    </thead>
-                    <tbody id="jobBody"></tbody>
-                </table>
                 <div class="warn" id="jobWarn"></div>
-                <button class="btn go" id="btnSim" type="button">SIMULATE</button>
-                <div class="sim-time" id="simTime">C++ engine · idle</div>
             </div>
         </div>
     </aside>
 
     <main class="stage">
-        <div class="compare-strip" id="compareStrip">Fabric height · Nesting <b>—</b> · Custom <b>—</b></div>
+        <div class="top-line">
+            <div class="setup-inline">
+                <span class="frame-tag">Settings</span>
+                <label>DIA (inches) <input id="inpDia" type="number" step="0.01" min="10" value="63" /></label>
+                <label>Time (sec) <input id="inpTime" type="number" step="1" min="5" max="90" value="20" /></label>
+            </div>
+            <div class="setup-gear-wrap">
+                <button class="btn gear-btn" id="btnSettings" type="button" title="Settings" aria-label="Settings">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.55-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.8 8.84a.5.5 0 0 0 .12.64L4.95 11.06c-.04.31-.06.63-.06.94s.02.63.06.94L2.92 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.39 1.04.7 1.63.94l.36 2.54c.05.24.26.42.5.42h3.8c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.55 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/>
+                    </svg>
+                </button>
+                <div class="settings-pop" id="settingsPop" hidden>
+                    <label>Min gap (inches) <input id="inpGap" type="number" step="0.01" min="0" value="0.05" /></label>
+                    <label>Body rows / document <input id="inpRows" type="number" step="1" min="1" value="4" /></label>
+                    <label>Rib (short + long) <select id="sleeveKey"></select></label>
+                </div>
+            </div>
+        </div>
 
         <section class="pane" id="paneNesting">
             <div class="stage-bar">
-                <div class="pane-title">NESTING · Sparrow · 30s</div>
+                <div class="stage-bar-left">
+                    <div class="pane-title">NESTING · Sparrow · <span id="nestTimeLabel">20</span>s</div>
+                    <div class="stats" id="statsNesting">fabric <b>—</b></div>
+                </div>
                 <div class="zoom-bar">
                     <button class="btn" id="btnNestZoomOut" type="button">−</button>
                     <span id="nestZoomPct">100%</span>
                     <button class="btn" id="btnNestZoomIn" type="button">+</button>
                     <button class="btn ghost" id="btnNestZoomFit" type="button">Fit</button>
                 </div>
-                <div class="stats" id="statsNesting">Waiting for backend</div>
             </div>
             <div class="canvas-wrap" id="viewportNesting">
                 <div id="stageNesting"></div>
-                <div class="pane-empty" id="emptyNesting">Nesting preview · same input · fabric height</div>
+                <div class="pane-empty" id="emptyNesting">20.0</div>
             </div>
         </section>
 
         <section class="pane" id="paneCustom">
             <div class="stage-bar">
-                <div class="pane-title">CUSTOM · nest.exe</div>
-                <div class="tabs" id="tabs"></div>
+                <div class="stage-bar-left">
+                    <div class="pane-title">CUTTING FRIENDLY</div>
+                    <div class="stats" id="stats">fabric <b>—</b></div>
+                </div>
                 <div class="zoom-bar">
                     <button class="btn" id="btnZoomOut" type="button">−</button>
                     <span id="zoomPct">100%</span>
                     <button class="btn" id="btnZoomIn" type="button">+</button>
                     <button class="btn ghost" id="btnZoomFit" type="button">Fit</button>
-                    <button class="btn" id="btnDownloadSvg" type="button">Download SVG</button>
-                    <button class="btn" id="btnDownloadJson" type="button">Download JSON</button>
                 </div>
-                <div class="stats" id="stats">Waiting for backend</div>
             </div>
             <div class="canvas-wrap" id="viewport">
                 <div id="stageWorld"></div>
-                <div class="legend">
-                    <span><i class="f"></i>FRONT</span>
-                    <span><i class="b"></i>BACK</span>
-                    <span><i class="s"></i>SLEEVE</span>
-                    <span><i class="r"></i>OVERLAY</span>
-                </div>
-                <div class="hint">Wheel = zoom · Drag = pan · zoom out stops at Fit</div>
+                <div class="pane-empty" id="emptyCustom">20.0</div>
             </div>
         </section>
     </main>

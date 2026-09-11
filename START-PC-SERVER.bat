@@ -31,10 +31,10 @@ if errorlevel 1 (
   )
 )
 
-echo Starting Custom Nest API  :8765
+echo Starting Custom Nest API  :9785
 start "PF Custom Nest API" /D "%~dp0nest\custom-nest\backend" cmd /c "start.bat"
 
-echo Starting Nesting API      :8766
+echo Starting Nesting API      :9786
 start "PF Nesting API" /D "%~dp0nest\nesting\backend" cmd /c "start.bat"
 
 timeout /t 2 /nobreak >nul
@@ -44,8 +44,8 @@ if not exist "%~dp0nest\pc-server\config.yml" (
   echo Tunnel setup HOYNAI.
   echo Age SETUP-CLOUDFLARE-TUNNEL.bat ekbar chalan.
   echo Local APIs chalu ache:
-  echo   http://127.0.0.1:8765/health
-  echo   http://127.0.0.1:8766/health
+  echo   http://127.0.0.1:9785/health
+  echo   http://127.0.0.1:9786/health
   echo.
   pause
   exit /b 1
@@ -62,8 +62,8 @@ if not defined CF (
 )
 
 echo Starting Cloudflare Tunnel...
-echo nest-api.patternflow.fit  -^> 8765
-echo nesting-api.patternflow.fit -^> 8766
+echo nest-api.patternflow.fit  -^> 9785
+echo nesting-api.patternflow.fit -^> 9786
 echo.
 "%CF%" tunnel --config "%~dp0nest\pc-server\config.yml" run
 echo.

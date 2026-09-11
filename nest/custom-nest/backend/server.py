@@ -8,7 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ENGINE = os.path.join(ROOT, "engine", "nest.exe")
-PORT = int(os.environ.get("PF_NEST_PORT", "8765"))
+PORT = int(os.environ.get("PF_NEST_PORT", "9785"))
 HOST = os.environ.get("PF_NEST_HOST", "127.0.0.1")
 # Cloudflare edge ~100s; stay under that on the public tunnel.
 NEST_OFF_TIMEOUT_S = 90

@@ -8,7 +8,7 @@ originRequest:
   disableChunkedEncoding: true
 ingress:
   - hostname: nest-api.patternflow.fit
-    service: http://127.0.0.1:8765
+    service: http://127.0.0.1:9785
   - hostname: nesting-api.patternflow.fit
-    service: http://127.0.0.1:8766
+    service: http://127.0.0.1:9786
   - service: http_status:404
