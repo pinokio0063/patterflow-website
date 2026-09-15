@@ -378,6 +378,20 @@
         if (el) el.textContent = String(nestTimeLimit());
     }
 
+    function newQueueTicket() {
+        var bytes = new Uint8Array(16);
+        if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+        else for (var i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        var hex = [];
+        for (var j = 0; j < 16; j++) hex.push(('0' + bytes[j].toString(16)).slice(-2));
+        return hex.slice(0, 4).join('') + '-' + hex.slice(4, 6).join('') + '-' + hex.slice(6, 8).join('') + '-' + hex.slice(8, 10).join('') + '-' + hex.slice(10, 16).join('');
+    }
+
+    var simTicket = '';
+    var nestStartedAt = 0;
+
     function setCountdown(sec) {
         var text = (Math.max(0, Number(sec) || 0)).toFixed(1);
         var nodes = document.querySelectorAll('.pane-empty .cd');
@@ -397,19 +411,24 @@
     }
 
     function pollQueues() {
+        var q = simTicket ? ('?ticket=' + encodeURIComponent(simTicket)) : '';
         return Promise.all([
-            readQueue(window.PF_NEST_API ? apiUrl('/queue') : ''),
-            readQueue(window.PF_NESTING_API ? nestingApiUrl('/queue') : '')
+            readQueue(window.PF_NEST_API ? apiUrl('/queue' + q) : ''),
+            readQueue(window.PF_NESTING_API ? nestingApiUrl('/queue' + q) : '')
         ]).then(function (pair) {
             var custom = pair[0] || {};
             var sparrow = pair[1] || {};
-            var wait = Math.max(Number(custom.waiting) || 0, Number(sparrow.waiting) || 0);
-            var run = (Number(custom.running) || 0) || (Number(sparrow.running) || 0);
+            var waiting = custom.status === 'waiting' || sparrow.status === 'waiting';
+            var running = custom.status === 'running' || sparrow.status === 'running';
             var msg = sparrow.message || custom.message || '';
-            if (wait > 0) {
-                msg = 'Server: waiting in line · ' + wait + ' ahead';
-            } else if (run > 0) {
-                msg = 'Server: your job is running';
+            if (waiting) {
+                nestStartedAt = 0;
+                var ahead = Math.max(Number(custom.ahead) || 0, Number(sparrow.ahead) || 0);
+                msg = 'Server: waiting · ' + ahead + ' ahead · 4 slots busy';
+                setCountdown(nestTimeLimit());
+            } else if (running) {
+                if (!nestStartedAt) nestStartedAt = Date.now();
+                msg = sparrow.message || custom.message || 'Server: your job is running';
             }
             setQueueMsg(msg);
             return msg;
@@ -469,7 +488,8 @@
         }
         btn.disabled = true;
         btn.textContent = 'START';
-        var t0 = Date.now();
+        simTicket = newQueueTicket();
+        nestStartedAt = 0;
         var limit = nestTimeLimit();
         lastResult = null;
         lastNesting = null;
@@ -481,10 +501,15 @@
         showEmptyFrames(true);
         setCountdown(limit);
         setQueueMsg('Server: joining queue…');
-        setSimTime('calculating… ' + limit.toFixed(1) + ' s');
+        setSimTime('waiting for a slot…');
         pollQueues();
         var tick = setInterval(function () {
-            var left = Math.max(0, limit - (Date.now() - t0) / 1000);
+            if (!nestStartedAt) {
+                setCountdown(limit);
+                setSimTime('waiting for a slot…');
+                return;
+            }
+            var left = Math.max(0, limit - (Date.now() - nestStartedAt) / 1000);
             setCountdown(left);
             setSimTime('calculating… ' + left.toFixed(1) + ' s');
         }, 100);
@@ -495,6 +520,7 @@
             rowsPerDoc: parseInt($('inpRows').value, 10) || 4,
             sleeveKey: $('sleeveKey').value === 'without_rib' ? 'short_slv_without_rib' : 'short_slv_with_rib',
             timeSec: limit,
+            queueTicket: simTicket,
             devTrials: false,
             job: collectJob(),
             chart: window.PF_CHART || {},
@@ -526,7 +552,8 @@
             paintNesting(true);
             renderStats();
             renderNestingStats();
-            var sec = (Date.now() - t0) / 1000;
+            var started = nestStartedAt || Date.now();
+            var sec = (Date.now() - started) / 1000;
             if ((!custom || custom.pending) && (!nesting || nesting.pending)) {
                 setSimTime('preview only · backends not connected');
             } else {

@@ -12,4 +12,7 @@ Priceing website/
 node_modules/
 .wrangler/
 nest/pc-server/config.yml
+nest/pc-server/*.json
+nest/pc-server/cert.pem
+nest/pc-server/cloudflared.exe
 nest/nesting/backend/runtime/

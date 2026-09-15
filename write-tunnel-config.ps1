@@ -1,24 +1,40 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$dest = Join-Path $root "nest\pc-server\config.yml"
-$cfDir = Join-Path $env:USERPROFILE ".cloudflared"
-if (-not (Test-Path $cfDir)) {
-    throw ".cloudflared folder not found. Run cloudflared tunnel login first."
+$pc = Join-Path $root "nest\pc-server"
+if (-not (Test-Path $pc)) {
+    New-Item -ItemType Directory -Path $pc | Out-Null
 }
 
-$cred = Get-ChildItem $cfDir -Filter "*.json" |
+$cfDir = Join-Path $env:USERPROFILE ".cloudflared"
+$localJson = Get-ChildItem $pc -Filter "*.json" -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -match "^[0-9a-f-]{36}\.json$" } |
     Sort-Object LastWriteTime -Descending |
     Select-Object -First 1
-if (-not $cred) {
-    throw "Tunnel credentials JSON not found in $cfDir"
+
+if (-not $localJson) {
+    if (-not (Test-Path $cfDir)) {
+        throw ".cloudflared folder not found. Run SETUP-CLOUDFLARE-TUNNEL.bat first."
+    }
+    $cred = Get-ChildItem $cfDir -Filter "*.json" |
+        Where-Object { $_.Name -match "^[0-9a-f-]{36}\.json$" } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+    if (-not $cred) {
+        throw "Tunnel credentials JSON not found in $cfDir"
+    }
+    Copy-Item $cred.FullName (Join-Path $pc $cred.Name) -Force
+    $localJson = Get-Item (Join-Path $pc $cred.Name)
 }
 
-$uuid = [System.IO.Path]::GetFileNameWithoutExtension($cred.Name)
-$credPath = $cred.FullName -replace "\\", "/"
+$certSrc = Join-Path $cfDir "cert.pem"
+if (Test-Path $certSrc) {
+    Copy-Item $certSrc (Join-Path $pc "cert.pem") -Force
+}
+
+$uuid = [System.IO.Path]::GetFileNameWithoutExtension($localJson.Name)
 $yml = @"
 tunnel: $uuid
-credentials-file: $credPath
+credentials-file: $($localJson.Name)
 protocol: http2
 originRequest:
   connectTimeout: 30s
@@ -31,10 +47,7 @@ ingress:
     service: http://127.0.0.1:9786
   - service: http_status:404
 "@
-$outDir = Split-Path $dest -Parent
-if (-not (Test-Path $outDir)) {
-    New-Item -ItemType Directory -Path $outDir | Out-Null
-}
-[System.IO.File]::WriteAllText($dest, $yml)
-Write-Host "Wrote $dest"
+[System.IO.File]::WriteAllText((Join-Path $pc "config.yml"), $yml)
+Write-Host "Wrote $($pc)\config.yml"
 Write-Host "tunnel $uuid"
+Write-Host "credentials $($localJson.Name)"

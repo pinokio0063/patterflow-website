@@ -7,19 +7,19 @@ Sparrow input (points), runs temp.exe, returns fabric meters + SVG.
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
-import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(ROOT, "..", "..")))
+from job_queue import JobQueue  # noqa: E402
+
 ENGINE = os.path.join(ROOT, "temp.exe")
 RUNTIME = os.path.join(ROOT, "runtime")
-OUTPUT_DIR = os.path.join(RUNTIME, "output")
-INPUT_PATH = os.path.join(RUNTIME, "input.json")
-OUTPUT_SVG = os.path.join(OUTPUT_DIR, "final_patternflow_nest.svg")
-OUTPUT_JSON = os.path.join(OUTPUT_DIR, "final_patternflow_nest.json")
 PORT = int(os.environ.get("PF_NESTING_PORT", "9786"))
 HOST = os.environ.get("PF_NESTING_HOST", "127.0.0.1")
 PT_PER_IN = 72.0
@@ -27,55 +27,6 @@ IN_TO_M = 0.0254
 # Browser/Cloudflare wait ~100s; keep engine under that.
 MAX_TIME_SEC = 90
 IO_OVERHEAD_SEC = 4
-MAX_LINE = 4
-# temp.exe uses one shared runtime folder — one job at a time.
-
-
-class JobQueue(object):
-    def __init__(self):
-        self._job = threading.Lock()
-        self._st = threading.Lock()
-        self.waiting = 0
-        self.running = 0
-
-    def snapshot(self):
-        with self._st:
-            wait = self.waiting
-            run = self.running
-        if run and wait:
-            msg = "Server: 1 running, %s waiting. Your turn is next in line." % wait
-        elif run:
-            msg = "Server: job is running."
-        elif wait:
-            msg = "Server: %s waiting." % wait
-        else:
-            msg = "Server: ready."
-        return {
-            "ok": True,
-            "running": run,
-            "waiting": wait,
-            "position": run + wait,
-            "max": MAX_LINE,
-            "message": msg,
-        }
-
-    def acquire(self):
-        with self._st:
-            if self.running + self.waiting >= MAX_LINE:
-                return False
-            self.waiting += 1
-        self._job.acquire()
-        with self._st:
-            self.waiting = max(0, self.waiting - 1)
-            self.running += 1
-        return True
-
-    def release(self):
-        with self._st:
-            self.running = max(0, self.running - 1)
-        if self._job.locked():
-            self._job.release()
-
 
 QUEUE = JobQueue()
 
@@ -307,14 +258,16 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        path = self.path.split("?", 1)[0]
+        parsed = urlparse(self.path)
+        path = parsed.path
+        ticket = (parse_qs(parsed.query).get("ticket") or [""])[0]
         if path == "/queue":
-            snap = QUEUE.snapshot()
+            snap = QUEUE.snapshot(ticket)
             snap["engine"] = "sparrow"
             self._json(200, snap)
             return
         if path in ("/", "/health", "/engine", "/simulate"):
-            snap = QUEUE.snapshot()
+            snap = QUEUE.snapshot(ticket)
             snap.update({
                 "engine": "sparrow",
                 "exe": os.path.isfile(ENGINE),
@@ -330,7 +283,6 @@ class Handler(BaseHTTPRequestHandler):
             return
         length = int(self.headers.get("Content-Length") or 0)
         raw = self.rfile.read(length) if length else b"{}"
-        t0 = time.time()
         if not os.path.isfile(ENGINE):
             self._json(503, fail_payload(
                 "temp.exe missing. Put it in nest\\nesting\\backend\\temp.exe"
@@ -356,29 +308,33 @@ class Handler(BaseHTTPRequestHandler):
             time_sec = MAX_TIME_SEC
         cli_time = max(3, time_sec - IO_OVERHEAD_SEC)
         http_limit = time_sec + 20
-        if not QUEUE.acquire():
-            self._json(429, fail_payload("Queue full (%s). Wait and try again." % MAX_LINE))
-            return
+        ticket = QUEUE.acquire(body.get("queueTicket") if isinstance(body, dict) else None)
+        job_dir = os.path.join(RUNTIME, "jobs", "".join(
+            ch if ch.isalnum() or ch in "-_" else "-" for ch in ticket
+        )[:80] or "job")
+        output_dir = os.path.join(job_dir, "output")
+        input_path = os.path.join(job_dir, "input.json")
+        output_svg = os.path.join(output_dir, "final_patternflow_nest.svg")
+        output_json = os.path.join(output_dir, "final_patternflow_nest.json")
+        svg_raw = ""
+        t0 = time.time()
         try:
-            os.makedirs(OUTPUT_DIR, exist_ok=True)
-            with open(INPUT_PATH, "w", encoding="utf-8") as fh:
+            os.makedirs(output_dir, exist_ok=True)
+            with open(input_path, "w", encoding="utf-8") as fh:
                 json.dump(sparrow, fh)
-            for path in (OUTPUT_SVG, OUTPUT_JSON):
-                if os.path.isfile(path):
-                    os.remove(path)
             proc = subprocess.run(
-                [ENGINE, "-i", INPUT_PATH, "-t", str(cli_time), "-x"],
-                cwd=RUNTIME,
+                [ENGINE, "-i", input_path, "-t", str(cli_time), "-x"],
+                cwd=job_dir,
                 capture_output=True,
                 timeout=http_limit,
             )
-            if not os.path.isfile(OUTPUT_SVG):
+            if not os.path.isfile(output_svg):
                 elapsed = int((time.time() - t0) * 1000)
                 err = (proc.stderr or proc.stdout or b"").decode("utf-8", "replace").strip()
                 hint = err.splitlines()[-1] if err else ("exit %s" % proc.returncode)
                 self._json(500, fail_payload("temp.exe produced no SVG (%s)" % hint, elapsed))
                 return
-            with open(OUTPUT_SVG, "r", encoding="utf-8") as fh:
+            with open(output_svg, "r", encoding="utf-8") as fh:
                 svg_raw = fh.read()
         except subprocess.TimeoutExpired:
             elapsed = int((time.time() - t0) * 1000)
@@ -388,7 +344,13 @@ class Handler(BaseHTTPRequestHandler):
             self._json(500, fail_payload("Could not start temp.exe: %s" % e))
             return
         finally:
-            QUEUE.release()
+            QUEUE.release(ticket)
+            try:
+                shutil.rmtree(job_dir, ignore_errors=True)
+            except Exception:
+                pass
+        if not svg_raw:
+            return
         elapsed = int((time.time() - t0) * 1000)
         meters = fabric_meters(svg_raw)
         self._json(200, {
@@ -417,7 +379,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(os.path.join(RUNTIME, "jobs"), exist_ok=True)
     if not os.path.isfile(ENGINE):
         print("WARNING: temp.exe not found in nest\\nesting\\backend\\")
     print("PatternFlow Nesting (Sparrow)  http://%s:%s/  (temp.exe)" % (HOST, PORT))

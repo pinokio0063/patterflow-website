@@ -39,7 +39,8 @@ start "PF Nesting API" /D "%~dp0nest\nesting\backend" cmd /c "start.bat"
 
 timeout /t 2 /nobreak >nul
 
-if not exist "%~dp0nest\pc-server\config.yml" (
+set "PC=%~dp0nest\pc-server"
+if not exist "%PC%\config.yml" (
   echo.
   echo Tunnel setup HOYNAI.
   echo Age SETUP-CLOUDFLARE-TUNNEL.bat ekbar chalan.
@@ -52,7 +53,8 @@ if not exist "%~dp0nest\pc-server\config.yml" (
 )
 
 set "CF="
-where cloudflared >nul 2>&1 && set "CF=cloudflared"
+if exist "%PC%\cloudflared.exe" set "CF=%PC%\cloudflared.exe"
+if not defined CF where cloudflared >nul 2>&1 && set "CF=cloudflared"
 if not defined CF if exist "C:\Program Files (x86)\cloudflared\cloudflared.exe" set "CF=C:\Program Files (x86)\cloudflared\cloudflared.exe"
 if not defined CF if exist "C:\Program Files\cloudflared\cloudflared.exe" set "CF=C:\Program Files\cloudflared\cloudflared.exe"
 if not defined CF (
@@ -64,8 +66,11 @@ if not defined CF (
 echo Starting Cloudflare Tunnel...
 echo nest-api.patternflow.fit  -^> 9785
 echo nesting-api.patternflow.fit -^> 9786
+echo Account: nest\pc-server\CLOUDFLARE-ACCOUNT.txt
 echo.
-"%CF%" tunnel --config "%~dp0nest\pc-server\config.yml" run
+pushd "%PC%"
+"%CF%" tunnel --config "%PC%\config.yml" run
+popd
 echo.
 echo Tunnel bondho. Custom Nest / Nesting window alada close korun.
 pause

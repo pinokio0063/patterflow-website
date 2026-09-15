@@ -1,6 +1,6 @@
 # Filled by SETUP-CLOUDFLARE-TUNNEL.bat. Do not put credentials in git.
 tunnel: REPLACE_UUID
-credentials-file: REPLACE_CREDENTIALS_FILE
+credentials-file: REPLACE_TUNNEL.json
 protocol: http2
 originRequest:
   connectTimeout: 30s

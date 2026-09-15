@@ -1,0 +1,34 @@
+PatternFlow — Cloudflare nest tunnel (keep this file with the Home page folder)
+
+Account email:  pinokio0063@gmail.com
+Account ID:     2613ab809e575b8e0b2fa7070ec0be87
+Domain:         patternflow.fit
+Tunnel name:    patternflow-pc
+Tunnel UUID (current): e671ff20-f8a4-41cf-8106-1e6fd1ebb3fe
+Local credentials:     e671ff20-f8a4-41cf-8106-1e6fd1ebb3fe.json
+Older UUID (unused):   fc3eef7d-3a71-4b89-9a1f-9db007889954
+
+If START-PC-SERVER says "Tunnel not found", the JSON in this folder is for an old tunnel.
+Fix (this PC, internet on):
+  1. Double-click SETUP-CLOUDFLARE-TUNNEL.bat
+  OR in this folder run:
+     cloudflared tunnel token --cred-file e671ff20-f8a4-41cf-8106-1e6fd1ebb3fe.json patternflow-pc
+  2. Edit config.yml so "tunnel:" matches that UUID and credentials-file is that json name.
+
+Public APIs (tunnel -> this PC):
+  https://nest-api.patternflow.fit      -> 127.0.0.1:9785  Custom nest.exe
+  https://nesting-api.patternflow.fit   -> 127.0.0.1:9786  Sparrow temp.exe
+Site:
+  https://nest.patternflow.fit/
+
+Move this whole "Home page" folder to another Windows PC:
+  1. Copy EVERYTHING including nest\pc-server\ (config.yml + the UUID.json + cert.pem).
+     Those three are not in git. USB / zip copy keeps them.
+  2. Install Python 3 (python.org) and tick "Add to PATH".
+  3. If nest\pc-server\cloudflared.exe is missing, install:
+       winget install --id Cloudflare.cloudflared
+  4. Double-click START-PC-SERVER.bat
+  5. PC Sleep = Never while plugged in.
+
+Do not commit UUID.json / cert.pem / config.yml to GitHub.
+First-time tunnel on a new Cloudflare account: SETUP-CLOUDFLARE-TUNNEL.bat
