@@ -19,8 +19,8 @@
     ];
 
     var RIB_KEYS = [
-        { id: 'with_rib', label: 'With rib' },
-        { id: 'without_rib', label: 'Without rib' }
+        { id: 'without_rib', label: 'Without rib' },
+        { id: 'with_rib', label: 'With rib' }
     ];
 
     function chart() {

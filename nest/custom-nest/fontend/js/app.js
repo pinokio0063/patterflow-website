@@ -49,7 +49,79 @@
         sk.innerHTML = CN.chart.RIB_KEYS.map(function (k) {
             return '<option value="' + k.id + '">' + k.label + '</option>';
         }).join('');
-        sk.value = 'with_rib';
+        sk.value = 'without_rib';
+    }
+
+    function sleevePartKeys() {
+        var without = $('sleeveKey') && $('sleeveKey').value === 'without_rib';
+        return {
+            short: without ? 'short_slv_without_rib' : 'short_slv_with_rib',
+            long: without ? 'long_slv_without_rib' : 'long_slv_with_rib'
+        };
+    }
+
+    function chartPart(size, key) {
+        var row = window.PF_CHART && window.PF_CHART[size];
+        if (!row) return { width: 0, height: 0 };
+        if (!row[key] || typeof row[key] !== 'object') row[key] = { width: 0, height: 0 };
+        return row[key];
+    }
+
+    function numVal(n) {
+        var x = Number(n);
+        if (!isFinite(x)) return '';
+        return String(Math.round(x * 10000) / 10000);
+    }
+
+    function dimInput(size, part, field, val) {
+        return '<input type="number" step="0.0001" min="0" data-size="' + size
+            + '" data-part="' + part + '" data-field="' + field
+            + '" value="' + numVal(val) + '" />';
+    }
+
+    function renderChartEditor() {
+        var host = $('chartEdit');
+        if (!host) return;
+        var keys = sleevePartKeys();
+        var sizes = CN.chart.sizeKeys();
+        var html = '<table><thead><tr>'
+            + '<th rowspan="2">SIZE</th>'
+            + '<th colspan="2">Body</th>'
+            + '<th colspan="2">Short</th>'
+            + '<th colspan="2">Long</th>'
+            + '</tr><tr>'
+            + '<th>W</th><th>H</th><th>W</th><th>H</th><th>W</th><th>H</th>'
+            + '</tr></thead><tbody>';
+        sizes.forEach(function (size) {
+            var body = chartPart(size, 'FONT_BACK');
+            var sh = chartPart(size, keys.short);
+            var lg = chartPart(size, keys.long);
+            html += '<tr>'
+                + '<td class="sz">' + size + '</td>'
+                + '<td>' + dimInput(size, 'FONT_BACK', 'width', body.width) + '</td>'
+                + '<td>' + dimInput(size, 'FONT_BACK', 'height', body.height) + '</td>'
+                + '<td>' + dimInput(size, keys.short, 'width', sh.width) + '</td>'
+                + '<td>' + dimInput(size, keys.short, 'height', sh.height) + '</td>'
+                + '<td>' + dimInput(size, keys.long, 'width', lg.width) + '</td>'
+                + '<td>' + dimInput(size, keys.long, 'height', lg.height) + '</td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+        host.innerHTML = html;
+        Array.prototype.forEach.call(host.querySelectorAll('input'), function (inp) {
+            inp.addEventListener('change', onChartCell);
+            inp.addEventListener('input', onChartCell);
+        });
+    }
+
+    function onChartCell(e) {
+        var inp = e.target;
+        var size = inp.getAttribute('data-size');
+        var part = inp.getAttribute('data-part');
+        var field = inp.getAttribute('data-field');
+        var n = parseFloat(inp.value);
+        if (isNaN(n) || n < 0) n = 0;
+        chartPart(size, part)[field] = n;
     }
 
     function bindSlot(role, slotId, fileId, thumbId, nameId) {
@@ -148,6 +220,10 @@
             Array.prototype.forEach.call(document.querySelectorAll('.pattern-card'), function (el) {
                 el.classList.toggle('on', el.getAttribute('data-id') === item.id);
             });
+            if ($('sleeveKey') && item.id === 'polo') {
+                $('sleeveKey').value = 'without_rib';
+                renderChartEditor();
+            }
             if ($('patternStatus')) {
                 $('patternStatus').textContent = item.name + ' loaded'
                     + (masters.font ? ' · FRONT' : '')
@@ -208,7 +284,7 @@
             applySvg('back', arr[1], 'BACK.svg', 'thumbBack', 'nameBack', $('slotBack'));
             applySvg('sleeve', arr[2], 'SLEEVE-SHORT.svg', 'thumbSleeve', 'nameSleeve', $('slotSleeve'));
             applySvg('sleeveLong', arr[3], 'SLEEVE-LONG.svg', 'thumbSleeveLong', 'nameSleeveLong', $('slotSleeveLong'));
-            $('sleeveKey').value = 'with_rib';
+            $('sleeveKey').value = 'without_rib';
         }).catch(function () {
             alert('Could not fetch samples. Use start.bat (local server), or drop the SVG files yourself.');
         });
@@ -740,6 +816,8 @@
 
     function init() {
         fillSleeveSelect();
+        renderChartEditor();
+        if ($('sleeveKey')) $('sleeveKey').addEventListener('change', renderChartEditor);
         loadPatternCatalog();
         var gear = $('btnSettings');
         var pop = $('settingsPop');
@@ -747,8 +825,12 @@
             gear.addEventListener('click', function (e) {
                 e.stopPropagation();
                 var open = pop.hasAttribute('hidden');
-                if (open) pop.removeAttribute('hidden');
-                else pop.setAttribute('hidden', '');
+                if (open) {
+                    pop.removeAttribute('hidden');
+                    renderChartEditor();
+                } else {
+                    pop.setAttribute('hidden', '');
+                }
                 gear.classList.toggle('on', open);
             });
             document.addEventListener('click', function (e) {

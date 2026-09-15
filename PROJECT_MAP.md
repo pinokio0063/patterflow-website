@@ -25,7 +25,7 @@ One-click site deploy: `PUSH-ALL.bat` (commit, push, deploy workers). Nest patte
 
 ## Nest compare
 
-Public UI compares **Nesting (Sparrow)** vs **Custom (`nest.exe`)**. SIMULATE POSTs the same job JSON to both APIs. API bases are in `nest/custom-nest/fontend/js/config.js`.
+Public UI compares **Nesting (Sparrow)** vs **Custom (`nest.exe`)**. SIMULATE POSTs the same job JSON to both APIs. API bases are in `nest/custom-nest/fontend/js/config.js`. The settings gear holds gap/rows/rib plus an editable per-size W×H chart (body, short, long). Polo defaults to without rib. The live `PF_CHART` object is what `/simulate` sends.
 
 Patterns: drop a style folder in `nest/itam/pattern/{name}/`. `PUSH-ALL.bat` copies into `nest/custom-nest/fontend/patterns/`.
 
